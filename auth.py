@@ -62,7 +62,8 @@ def user():
     # Requests coming through IAP have special headers
     assertion = request.headers.get('X-Goog-IAP-JWT-Assertion')
     if assertion is None:   # Request did not come through IAP
-        return None, None
+        raise ValueError(
+        'La autenticación ha fallado. No se proporcionó una afirmación IAP válida.')
 
     info = jwt.decode(
         assertion,
