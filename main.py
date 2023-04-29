@@ -27,6 +27,7 @@ def set_response_headers(response):
     response.headers['Expires'] = '0'
     return response
 
+
 @app.route('/', methods=['GET'])
 def say_hello():
     user_email = request.headers.get('X-Goog-Authenticated-User-Email')
@@ -35,16 +36,24 @@ def say_hello():
     verified_email, verified_id = user()
 
     page = render_template('index.html',
-        email=user_email,
-        id=user_id,
-        verified_email=verified_email,
-        verified_id=verified_id)
+                           email=user_email,
+                           id=user_id,
+                           verified_email=verified_email,
+                           verified_id=verified_id)
     return page
+
+
+@app.route('/jsscript', methods=['GET'])
+def show_running_script():
+    page = render_template('jsscript.html')
+    return page
+
 
 @app.route('/privacy', methods=['GET'])
 def show_policy():
     page = render_template('privacy.html')
     return page
+
 
 @app.route('/test', methods=['GET'])
 def test():
@@ -54,13 +63,14 @@ def test():
     mac_address = str(mac_address.decode('utf-8')).split()[3]
 
     # Validar la dirección MAC del cliente
-    if mac_address == '64-6E-69-FF-D0-CB': # Reemplaza esto con la dirección MAC que deseas validar
+    if mac_address == '64-6E-69-FF-D0-CB':  # Reemplaza esto con la dirección MAC que deseas validar
         # Devolver la página privacy.html si la validación es exitosa
-        page = render_template('test.html', mac=mac_address)   
+        page = render_template('test.html', mac=mac_address)
         return page
     else:
         # Redirigir al usuario a una página de error o devolver una respuesta de error
-        return "Lo siento, no tienes permiso para acceder a esta página.", 403    
+        return "Lo siento, no tienes permiso para acceder a esta página.", 403
+
 
 if __name__ == '__main__':
     # This is used when running locally, only to verify it does not have
