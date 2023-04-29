@@ -18,7 +18,7 @@ import os
 import requests
 
 KEYS = None     # Cached public keys for verification
-AUDIENCE = None # Cached value requiring information from metadata server
+AUDIENCE = None  # Cached value requiring information from metadata server
 
 
 # Google publishes the public keys needed to verify a JWT. Save them in KEYS.
@@ -43,7 +43,7 @@ def audience():
         path = '/computeMetadata/v1/project/numeric-project-id'
         response = requests.get(
             '{}/{}'.format(endpoint, path),
-            headers = {'Metadata-Flavor': 'Google'}
+            headers={'Metadata-Flavor': 'Google'}
         )
         project_number = response.json()
 
@@ -70,5 +70,6 @@ def user():
         algorithms=['ES256'],
         audience=audience()
     )
-
-    return info['email'], info['sub']
+    raise ValueError(
+        'La autenticación ha fallado. No se proporcionó una afirmación IAP válida.')
+    # return info['email'], info['sub']
