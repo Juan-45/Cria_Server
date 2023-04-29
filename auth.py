@@ -71,6 +71,4 @@ def user():
         algorithms=['ES256'],
         audience=audience()
     )
-    raise ValueError(
-        'La autenticación ha fallado. No se proporcionó una afirmación IAP válida.')
-    # return info['email'], info['sub']
+    return info['email'], info['sub']
