@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from auth import user
 from flask import Flask, render_template, request
 import subprocess
 
@@ -28,7 +29,16 @@ def set_response_headers(response):
 
 @app.route('/', methods=['GET'])
 def say_hello():
-    page = render_template('index.html')
+    user_email = request.headers.get('X-Goog-Authenticated-User-Email')
+    user_id = request.headers.get('X-Goog-Authenticated-User-ID')
+
+    verified_email, verified_id = user()
+
+    page = render_template('index.html',
+        email=user_email,
+        id=user_id,
+        verified_email=verified_email,
+        verified_id=verified_id)
     return page
 
 @app.route('/privacy', methods=['GET'])
@@ -52,7 +62,6 @@ def test():
         # Redirigir al usuario a una página de error o devolver una respuesta de error
         return "Lo siento, no tienes permiso para acceder a esta página.", 403    
 
-# Test
 if __name__ == '__main__':
     # This is used when running locally, only to verify it does not have
     # significant errors. It cannot demonstrate restricting access using

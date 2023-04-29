@@ -1,14 +1,24 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-  <head>
-    <title>IAP Hello World</title>
-  </head>
-  <body>
-    <h1>Hello World</h1>
+<head>
+  <title>IAP Hello Verified User</title>
+</head>
+<body>
+  <h1>Hola usuario verificado</h1>
+  <h2>Es tiempo de App_OS</h2>
+  <p>
+    Hello, {{ email }}! Your persistent ID appears to be {{ id }}.
+  </p>
 
-    <p>
-      Hello, world! This is step 1 of the <em>User Authentication with IAP</em>
-      codelab.
-    </p>
-  </body>
+  <p>
+    Your verified email is {{ verified_email }},
+    and your verified persistent ID is {{ verified_id }}.
+  </p>
+
+  <p>
+    This is step 3 of the <em>User Authentication with IAP</em>
+    codelab.
+  </p>
+
+</body>
 </html>
