@@ -52,7 +52,7 @@ def test():
         # Redirigir al usuario a una página de error o devolver una respuesta de error
         return "Lo siento, no tienes permiso para acceder a esta página.", 403    
 
-
+# Test
 if __name__ == '__main__':
     # This is used when running locally, only to verify it does not have
     # significant errors. It cannot demonstrate restricting access using
