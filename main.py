@@ -22,57 +22,65 @@ app = Flask(__name__)
 # Disable browser caching so changes in each step are always shown
 @app.after_request
 def set_response_headers(response):
-    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
     return response
 
 
-@app.route('/', methods=['GET'])
-def say_hello():
-    user_email = request.headers.get('X-Goog-Authenticated-User-Email')
-    user_id = request.headers.get('X-Goog-Authenticated-User-ID')
-
-    verified_email, verified_id = user()
-
-    page = render_template('index.html',
-                           email=user_email,
-                           id=user_id,
-                           verified_email=verified_email,
-                           verified_id=verified_id)
+@app.route("/", methods=["GET"])
+def appOs():
+    page = render_template("index.html")
     return page
 
 
-@app.route('/jsscript', methods=['GET'])
+# @app.route('/', methods=['GET'])
+# def say_hello():
+#    user_email = request.headers.get('X-Goog-Authenticated-User-Email')
+#    user_id = request.headers.get('X-Goog-Authenticated-User-ID')
+
+#    verified_email, verified_id = user()
+
+#    page = render_template('index.html',
+#                           email=user_email,
+#                           id=user_id,
+#                           verified_email=verified_email,
+#                           verified_id=verified_id)
+#    return page
+
+
+@app.route("/jsscript", methods=["GET"])
 def show_running_script():
-    page = render_template('jsscript.html')
+    page = render_template("jsscript.html")
     return page
 
 
-@app.route('/privacy', methods=['GET'])
+@app.route("/privacy", methods=["GET"])
 def show_policy():
-    page = render_template('privacy.html')
+    page = render_template("privacy.html")
     return page
 
 
-@app.route('/test', methods=['GET'])
+@app.route("/test", methods=["GET"])
 def test():
     # Obtener la dirección MAC del cliente
-    mac_address = request.headers.get('X-Forwarded-For')
+    mac_address = request.headers.get("X-Forwarded-For")
     mac_address = subprocess.check_output(f"arp -a {mac_address}", shell=True)
-    mac_address = str(mac_address.decode('utf-8')).split()[3]
+    mac_address = str(mac_address.decode("utf-8")).split()[3]
 
     # Validar la dirección MAC del cliente
-    if mac_address == '64-6E-69-FF-D0-CB':  # Reemplaza esto con la dirección MAC que deseas validar
+    if (
+        mac_address == "64-6E-69-FF-D0-CB"
+    ):  # Reemplaza esto con la dirección MAC que deseas validar
         # Devolver la página privacy.html si la validación es exitosa
-        page = render_template('test.html', mac=mac_address)
+        page = render_template("test.html", mac=mac_address)
         return page
     else:
         # Redirigir al usuario a una página de error o devolver una respuesta de error
         return "Lo siento, no tienes permiso para acceder a esta página.", 403
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # This is used when running locally, only to verify it does not have
     # significant errors. It cannot demonstrate restricting access using
     # Identity-Aware Proxy when run locally, only when deployed.
@@ -80,4 +88,4 @@ if __name__ == '__main__':
     # When deploying to Google App Engine, a webserver process such as
     # Gunicorn will serve the app. This can be configured by adding an
     # `entrypoint` to app.yaml.
-    app.run(host='127.0.0.1', port=8080, debug=True)
+    app.run(host="127.0.0.1", port=8080, debug=True)
