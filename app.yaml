@@ -31,4 +31,4 @@ default_expiration: "1m"
 
 handlers:
   - url: /static
-    static_dir: public
+    static_dir: frontend/dist/public
