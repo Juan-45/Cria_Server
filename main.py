@@ -13,10 +13,30 @@
 # limitations under the License.
 
 from auth import user
-from flask import Flask, render_template, request
+from flask import (
+    Flask,
+    render_template,
+    request,
+    send_from_directory,
+    session,
+    make_response,
+)
+
+# from datetime import timedelta
 import subprocess
 
 app = Flask(__name__)
+
+# Configurar la clave secreta de la sesión (necesaria para la firma de cookies)
+app.secret_key = "clave_secreta"
+app.config["JSON_AS_ASCII"] = False
+
+# Configurar los parametros de la cookie de sesión
+# app.config["SESSION_COOKIE_SECURE"] = True  # Cookie solo accesible mediante HTTPS
+# app.config["SESSION_COOKIE_HTTPONLY"] = True  # Cookie solo accesible desde HTTP
+# app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(
+#    seconds=1800
+# )  # Duracion de la cookie
 
 
 # Disable browser caching so changes in each step are always shown
@@ -28,10 +48,39 @@ def set_response_headers(response):
     return response
 
 
-@app.route("/", methods=["GET"])
+# ONLY FOR LOCAL SERVER
+@app.route("/static/js/<path:path>")
+def send_js(path):
+    return send_from_directory("frontend/dist/public/js", path)
+
+
+@app.route("/", methods=["POST", "GET"])
 def appOs():
+    if request.method == "POST":
+        # record the user name
+        name = request.get_json()["name"]
+        if name is not None:
+            response = make_response(f"The Cookie has been Set")
+            response.set_cookie(
+                "session_id",
+                value=name,
+                max_age=10,
+                httponly=False,
+                secure=True,
+                samesite="Strict",
+            )
+            return response
+        else:
+            return render_template("testError.html")
     page = render_template("index.html")
     return page
+
+
+@app.route("/setcookie")
+def setcookie():
+    resp = make_response(f"The Cookie has been Set")
+    resp.set_cookie("Name", "AskPython")
+    return resp
 
 
 # @app.route('/', methods=['GET'])
