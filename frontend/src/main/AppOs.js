@@ -1,49 +1,93 @@
-import axios from "axios";
-import { useState } from "react";
+import React from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import MainContainer from "components/MainContainer";
+import PageRender from "components/PageRender";
+import PageContainer from "components/PageContainer";
+import ScrollToTop from "components/ScrollToTop";
+import { ThemeProvider, CssBaseline } from "@mui/material";
+import { theme } from "theme/theme";
+import Login from "pages/Login";
+import Home from "pages/Home";
+import Home2 from "pages/Home2";
+import Error404 from "pages/Error404";
 
 const AppOs = () => {
-  const [sessionLogged, setSessionLogged] = useState(false);
-  const requestCookie = () =>
-    axios
-      .post(
-        "/",
-        { name: "Juan" },
-        { headers: { "Content-Type": "application/json" } }
-      )
-      .then((response) => {
-        console.log(response.data);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  const [isRootLocation, setIsRootLocation] = useState(true);
+  const location = useLocation();
 
-  const getCookie = (name) => {
-    const cookieString = document.cookie;
-    const cookies = cookieString.split("; ");
-    for (let i = 0; i < cookies.length; i++) {
-      const [cookieName, cookieValue] = cookies[i].split("=");
-      if (cookieName === name) {
-        console.log("session_id ENCONTRADA", true);
-        // return cookieValue;
-        return setSessionLogged(true);
+  const navigationOptions = [
+    {
+      to: "/",
+      element: <Login />,
+    },
+    {
+      to: "/home",
+      label: "Home",
+      element: <Home />,
+    },
+    {
+      to: "/home2",
+      label: "Home2",
+      element: <Home2 />,
+    },
+  ];
+
+  const extraRoutes = [
+    {
+      path: "*",
+      element: <Error404 />,
+    },
+  ];
+
+  const navBarOptions = navigationOptions.slice(1);
+
+  const mapNested = (arr, extraRoutes) => {
+    const result = [];
+
+    arr.forEach((item) => {
+      if (item.nested === undefined) {
+        result.push({
+          path: item.to,
+          element: item.element,
+        });
+      } else {
+        item.nested.forEach((nestedItem) =>
+          result.push({
+            path: nestedItem.to,
+            element: nestedItem.element,
+          })
+        );
       }
-    }
-    //return null;
-    return setSessionLogged(false);
-  };
-  console.log("sessionLogged", sessionLogged);
-  return (
-    <div>
-      <h1>App OS</h1>
-      <button onClick={requestCookie}>Solicitar cookie de sesión</button>
-      <button onClick={() => getCookie("session_id")}>Obtener cookie</button>
+    });
 
-      {sessionLogged ? (
-        <h2>Cookie de sesión encontrada</h2>
-      ) : (
-        <h2>Cookie de sesión no encontrada</h2>
-      )}
-    </div>
+    return result.concat(extraRoutes);
+  };
+
+  const routesOptions = mapNested(navigationOptions, extraRoutes);
+
+  useEffect(() => {
+    const detectRootLocation = () => {
+      if (location.pathname === "/") {
+        setIsRootLocation(true);
+      } else setIsRootLocation(false);
+    };
+    detectRootLocation();
+  }, [location]);
+  return (
+    <ThemeProvider theme={theme}>
+      <ScrollToTop>
+        <CssBaseline enableColorScheme injectFirst />
+        <MainContainer>
+          <PageContainer
+            navBarOptions={navBarOptions}
+            hideNavBar={isRootLocation}
+          >
+            <PageRender routesOptions={routesOptions} />
+          </PageContainer>
+        </MainContainer>
+      </ScrollToTop>
+    </ThemeProvider>
   );
 };
 
