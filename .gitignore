@@ -9,3 +9,11 @@ env/
 # .vscode
 
 .vscode/
+
+# Pipfile
+
+Pipfile
+
+#Pipfile.lock
+
+Pipfile.lock
