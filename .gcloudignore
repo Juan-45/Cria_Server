@@ -35,29 +35,29 @@
 
 # Node
 
-frontend/node_modules
+node_modules/**
 
 # src
 
-frontend/src
+src/**
 
 # .babelrc
 
-frontend/.babelrc
+.babelrc
 
 # .gitignore
 
-frontend/.gitignore
+.gitignore
 
 # package-lock.json
 
-frontend/package-lock.json
+package-lock.json
 
 # package.json
 
-frontend/package.json
+package.json
 
 # webpack.config.js
 
-frontend/webpack.config.js
+webpack.config.js
 
