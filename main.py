@@ -20,7 +20,11 @@ from flask import (
     send_from_directory,
     session,
     make_response,
+    jsonify,
 )
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+import uuid
 
 # from datetime import timedelta
 import subprocess
@@ -31,12 +35,17 @@ app = Flask(__name__)
 app.secret_key = "clave_secreta"
 app.config["JSON_AS_ASCII"] = False
 
-# Configurar los parametros de la cookie de sesión
-# app.config["SESSION_COOKIE_SECURE"] = True  # Cookie solo accesible mediante HTTPS
-# app.config["SESSION_COOKIE_HTTPONLY"] = True  # Cookie solo accesible desde HTTP
-# app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(
-#    seconds=1800
-# )  # Duracion de la cookie
+
+def get_user():
+    return request.headers.get("User")
+
+
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["20 per minute", "3 per second"],
+)
+limiter.init_app(app)
 
 
 # Disable browser caching so changes in each step are always shown
@@ -54,16 +63,85 @@ def send_js(path):
     return send_from_directory("frontend/dist/public/js", path)
 
 
+id = str(uuid.uuid4())
+
+
+@app.route("/appOsResources", methods=["GET"])
+def deliver_resources():
+    data = {
+        "current_data_id": str(uuid.uuid4()),
+        "users": [
+            {
+                "id": str(uuid.uuid4()),
+                "label": "Herrera Juan José",
+                "value": {
+                    "rank": "Ofl. Ayte.",
+                    "secretary": "Herrera Juan José",
+                },
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "label": "Alderete Vanesa",
+                "value": {
+                    "rank": "Ofl. Ayte.",
+                    "secretary": "Alderete Vanesa",
+                },
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "label": "Faisal Walter",
+                "value": {
+                    "rank": "Ofl. SubAyte.",
+                    "secretary": "Faisal Walter",
+                },
+            },
+        ],
+        "instructors": [
+            {
+                "id": str(uuid.uuid4()),
+                "label": "Hector Andrés Caretta",
+                "value": {
+                    "rank": "Comisario",
+                    "instructor": "Hector Andrés Caretta",
+                },
+            }
+        ],
+        "prosecutions": [
+            {
+                "id": str(uuid.uuid4()),
+                "label": "UFI y J Nro. 1",
+                "value": {
+                    "prosecution": "UFI y J Nro. 1",
+                    "prosecutor": "Dr. Francisco Furnari",
+                },
+            }
+        ],
+        "courts": [
+            {
+                "id": str(uuid.uuid4()),
+                "label": "Juzg. Gtias. Nro. 1",
+                "value": {
+                    "court": "Juzg. Gtias. Nro. 1",
+                    "judge": "Dr. Fulanito",
+                },
+            }
+        ],
+    }
+    return jsonify(data)
+
+
 @app.route("/", methods=["POST", "GET"])
 def appOs():
     if request.method == "POST":
-        # record the user name
-        name = request.get_json()["name"]
-        if name is not None:
+        # record the user
+
+        user = request.get_json().get("user")
+        if isinstance(user, str):
+            # hacer algo con el user (es un string)
             response = make_response(f"The Cookie has been Set")
             response.set_cookie(
                 "session_id",
-                value=name,
+                value=user,
                 max_age=10,
                 httponly=False,
                 secure=True,
@@ -71,36 +149,9 @@ def appOs():
             )
             return response
         else:
-            return render_template("testError.html")
+            # manejar el caso en que user es None o no es un string
+            return render_template("ServerError.html")
     page = render_template("index.html")
-    return page
-
-
-@app.route("/setcookie")
-def setcookie():
-    resp = make_response(f"The Cookie has been Set")
-    resp.set_cookie("Name", "AskPython")
-    return resp
-
-
-# @app.route('/', methods=['GET'])
-# def say_hello():
-#    user_email = request.headers.get('X-Goog-Authenticated-User-Email')
-#    user_id = request.headers.get('X-Goog-Authenticated-User-ID')
-
-#    verified_email, verified_id = user()
-
-#    page = render_template('index.html',
-#                           email=user_email,
-#                           id=user_id,
-#                           verified_email=verified_email,
-#                           verified_id=verified_id)
-#    return page
-
-
-@app.route("/jsscript", methods=["GET"])
-def show_running_script():
-    page = render_template("jsscript.html")
     return page
 
 
@@ -110,23 +161,11 @@ def show_policy():
     return page
 
 
-@app.route("/test", methods=["GET"])
-def test():
-    # Obtener la dirección MAC del cliente
-    mac_address = request.headers.get("X-Forwarded-For")
-    mac_address = subprocess.check_output(f"arp -a {mac_address}", shell=True)
-    mac_address = str(mac_address.decode("utf-8")).split()[3]
-
-    # Validar la dirección MAC del cliente
-    if (
-        mac_address == "64-6E-69-FF-D0-CB"
-    ):  # Reemplaza esto con la dirección MAC que deseas validar
-        # Devolver la página privacy.html si la validación es exitosa
-        page = render_template("test.html", mac=mac_address)
-        return page
-    else:
-        # Redirigir al usuario a una página de error o devolver una respuesta de error
-        return "Lo siento, no tienes permiso para acceder a esta página.", 403
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def catch_all(path):
+    page = render_template("index.html")
+    return page
 
 
 if __name__ == "__main__":
