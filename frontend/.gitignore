@@ -1,14 +1,2 @@
 # Node
 node_modules/
-
-# env 
-
-../env/
-
-# .venv
-
-../.venv/
-
-# .vscode
-
-../.vscode/
