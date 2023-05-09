@@ -41119,7 +41119,7 @@ var Login = function Login() {
     children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(StyledPaper, {
       children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_mui_material__WEBPACK_IMPORTED_MODULE_9__["default"], {
         variant: "h2",
-        children: "Seleccione su usuario"
+        children: "Seleccione su usuario."
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(StyledSelect, {
         value: secretary,
         onChange: handleChange,
