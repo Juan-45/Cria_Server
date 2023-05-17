@@ -32,3 +32,5 @@ default_expiration: "1m"
 handlers:
   - url: /static
     static_dir: frontend/dist/public
+
+env_variables: include /env/env_variables.yaml
