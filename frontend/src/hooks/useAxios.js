@@ -1,19 +1,11 @@
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { useMemo, useCallback, useEffect } from "react";
 
 const useAxios = (method) => {
   const axiosController = useMemo(() => new AbortController(), []);
-  const navigate = useNavigate();
-
-  //ALERTA cambiar baseURL si se establece modo producción, cómo así también el modo de webpack
-  //axios.defaults.baseURL = 'http://localhost:1963/';
-
-  //axios.defaults.baseURL = 'http://lgasociados.ar/'
 
   var location = window.location;
   var baseUrl = location.protocol + "//" + location.host + "/";
-  //console.log(baseUrl);
 
   axios.defaults.baseURL = baseUrl;
 
@@ -35,8 +27,7 @@ const useAxios = (method) => {
           //return response
         })
         .catch(function (error) {
-          // console.log("Error---", error);
-          //Axios abort error, in case of component unmounted
+          //Component unmounted
           if (error.message !== "canceled") {
             if (error.response) {
               // The request was made and the server responded with a status code
@@ -51,8 +42,7 @@ const useAxios = (method) => {
               };
             } else if (error.request) {
               // The request was made but no response was received
-              // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-              // http.ClientRequest in node.js
+              // `error.request` is an instance of XMLHttpRequest in the browser
               console.log("No response error", error.request);
               return {
                 title: "La solicitud no obtuvo respuesta",
