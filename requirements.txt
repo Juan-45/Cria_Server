@@ -3,3 +3,4 @@ flask-limiter
 cryptography
 python-jose[cryptography]
 requests
+boto3
