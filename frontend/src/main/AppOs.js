@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import useCheckSession from "hooks/useCheckSession";
+import useAxios from "hooks/useAxios";
+import { useEffect } from "react";
 import MainContainer from "components/MainContainer";
 import PageRender from "components/PageRender";
 import PageContainer from "components/PageContainer";
@@ -9,11 +10,10 @@ import { theme } from "theme/theme";
 import Login from "pages/Login";
 import Home from "pages/Home";
 import Home2 from "pages/Home2";
-import Error404 from "pages/Error404";
 
 const AppOs = () => {
-  const [isRootLocation, setIsRootLocation] = useState(true);
-  const location = useLocation();
+  const { isRootLocation } = useCheckSession();
+  const requestGet = useAxios("get");
 
   const navigationOptions = [
     {
@@ -32,16 +32,9 @@ const AppOs = () => {
     },
   ];
 
-  const extraRoutes = [
-    {
-      path: "*",
-      element: <Error404 />,
-    },
-  ];
-
   const navBarOptions = navigationOptions.slice(1);
 
-  const mapNested = (arr, extraRoutes) => {
+  const mapNested = (arr) => {
     const result = [];
 
     arr.forEach((item) => {
@@ -60,19 +53,18 @@ const AppOs = () => {
       }
     });
 
-    return result.concat(extraRoutes);
+    return result;
   };
 
-  const routesOptions = mapNested(navigationOptions, extraRoutes);
-
+  const routesOptions = mapNested(navigationOptions);
   useEffect(() => {
-    const detectRootLocation = () => {
-      if (location.pathname === "/") {
-        setIsRootLocation(true);
-      } else setIsRootLocation(false);
-    };
-    detectRootLocation();
-  }, [location]);
+    const request_ps_data = () =>
+      requestGet({
+        url: "/psData",
+      });
+
+    request_ps_data();
+  }, [requestGet]);
   return (
     <ThemeProvider theme={theme}>
       <ScrollToTop>
