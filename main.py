@@ -51,8 +51,8 @@ aws_client = boto3.client(
     "dynamodb",
     config=aws_boto3_settings,
     # tokens
-    aws_access_key_id="AKIAU5I7KRUKA64TVUON",
-    aws_secret_access_key="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",
+    aws_access_key_id="ACCESS_KEY",
+    aws_secret_access_key="SECRET_KEY",
     #
 )
 
@@ -100,14 +100,14 @@ id = str(uuid.uuid4())
 def get_ps_data():
     try:
         response = aws_client.query(
-            TableName="app_OS",
+            TableName="app_OS_v1",
             ReturnConsumedCapacity="TOTAL",
-            # ExpressionAttributeValues={
-            #    ":v1": {
-            #        "S": "ps_data",
-            #    },
-            # },
-            # KeyConditionExpression="partition = :v1",
+             ExpressionAttributeValues={
+                ":v1": {
+                    "S": "ps_data",
+                },
+             },
+             KeyConditionExpression="part_key = :v1",
         )
         return response
     except ClientError as error:
