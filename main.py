@@ -34,7 +34,7 @@ import boto3
 from botocore.exceptions import ClientError
 from botocore.config import Config
 
-COOKIE_MAX_AGE = 3600  # 10
+COOKIE_MAX_AGE = 10  # 3600
 COOKIE_NAME = "session_id"
 REQUEST_TIMEOUT = 20
 MAX_ATTEMPS = 5
@@ -51,8 +51,8 @@ aws_client = boto3.client(
     "dynamodb",
     config=aws_boto3_settings,
     # tokens
-    aws_access_key_id="ACCESS_KEY",
-    aws_secret_access_key="SECRET_KEY",
+    aws_access_key_id="AKIAU5I7KRUKKRKMDK75",
+    aws_secret_access_key="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",
     #
 )
 
@@ -102,22 +102,22 @@ def get_ps_data():
         response = aws_client.query(
             TableName="app_OS_v1",
             ReturnConsumedCapacity="TOTAL",
-             ExpressionAttributeValues={
+            ExpressionAttributeValues={
                 ":v1": {
                     "S": "ps_data",
                 },
-             },
-             KeyConditionExpression="part_key = :v1",
+            },
+            KeyConditionExpression="part_key = :v1",
         )
+
         return response
     except ClientError as error:
         # Put your error handling logic here
         # Error handling
 
         error_message = {
-            "error": str(error),
+            "message": str(error),
             "code": error.response["Error"]["Code"],
-            "message": error.response["Error"]["Message"],
         }
         return jsonify(error_message), 500
 
@@ -233,7 +233,7 @@ def show_policy():
 
 
 # Allowed Client Side Routing paths
-allowed_paths = ["/home", "/home2"]
+allowed_paths = ["home", "home2"]
 
 
 @app.route("/", defaults={"path": ""})
