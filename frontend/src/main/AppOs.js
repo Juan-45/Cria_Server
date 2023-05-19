@@ -1,19 +1,28 @@
 import useCheckSession from "hooks/useCheckSession";
 import useAxios from "hooks/useAxios";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { ThemeProvider, CssBaseline } from "@mui/material";
+import { theme } from "theme/theme";
+import Context from "context/Context";
 import MainContainer from "components/MainContainer";
 import PageRender from "components/PageRender";
 import PageContainer from "components/PageContainer";
 import ScrollToTop from "components/ScrollToTop";
-import { ThemeProvider, CssBaseline } from "@mui/material";
-import { theme } from "theme/theme";
+import ErrorPopUp from "components/wrappers/ErrorPopUp";
 import Login from "pages/Login";
 import Home from "pages/Home";
 import Home2 from "pages/Home2";
 
 const AppOs = () => {
+  const [errorData, setErrorData] = useState({});
+  const [contextState, setContextState] = useState({
+    ps_data: { ps_dataid: "" },
+  });
   const { isRootLocation } = useCheckSession();
   const requestGet = useAxios("get");
+  //const requestGet1 = useAxios("get");
+
+  //Probar capacidad de almacenamiento localStorage, en diferentes circunstancias
 
   const navigationOptions = [
     {
@@ -57,26 +66,41 @@ const AppOs = () => {
   };
 
   const routesOptions = mapNested(navigationOptions);
+
   useEffect(() => {
-    const request_ps_data = () =>
-      requestGet({
+    const request_ps_data = async () => {
+      const data = await requestGet({
         url: "/psData",
       });
-
+      /*const data1 = await requestGet1({
+        url: "/psDataID",
+      });*/
+      console.log("Axios error data", data);
+      //  console.log("Axios error data", data1);
+      if (data.error) {
+        setErrorData(data);
+      }
+    };
     request_ps_data();
   }, [requestGet]);
   return (
     <ThemeProvider theme={theme}>
       <ScrollToTop>
         <CssBaseline enableColorScheme injectFirst />
-        <MainContainer>
-          <PageContainer
-            navBarOptions={navBarOptions}
-            hideNavBar={isRootLocation}
-          >
-            <PageRender routesOptions={routesOptions} />
-          </PageContainer>
-        </MainContainer>
+        <Context.Provider value={{ setContextState, ...contextState }}>
+          <MainContainer>
+            <ErrorPopUp
+              errorCondition={errorData.error}
+              errorData={errorData}
+            />
+            <PageContainer
+              navBarOptions={navBarOptions}
+              hideNavBar={isRootLocation}
+            >
+              <PageRender routesOptions={routesOptions} />
+            </PageContainer>
+          </MainContainer>
+        </Context.Provider>
       </ScrollToTop>
     </ThemeProvider>
   );
