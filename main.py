@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Dict, Any
 from auth import user
+from helpers.awsRequests import transform_query_response
 from flask import (
     Flask,
     render_template,
@@ -34,6 +36,7 @@ import boto3
 from botocore.exceptions import ClientError
 from botocore.config import Config
 
+
 COOKIE_MAX_AGE = 10  # 3600
 COOKIE_NAME = "session_id"
 REQUEST_TIMEOUT = 20
@@ -51,14 +54,14 @@ aws_client = boto3.client(
     "dynamodb",
     config=aws_boto3_settings,
     # tokens
-    aws_access_key_id="AKIAU5I7KRUKKRKMDK75",
-    aws_secret_access_key="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",
+    aws_access_key_id="key",
+    aws_secret_access_key="key",
     #
 )
 
 app = Flask(__name__)
 
-# Configurar la clave secreta de la sesión (necesaria para la firma de cookies)
+# to-do: Configurar la clave secreta de la sesión para producción (necesaria para la firma de cookies)
 app.secret_key = "clave_secreta"
 app.config["JSON_AS_ASCII"] = False
 
@@ -70,7 +73,7 @@ def get_user():
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=["20 per minute", "3 per second"],
+    default_limits=["10 per minute", "4 per second"],
 )
 limiter.init_app(app)
 
@@ -97,7 +100,7 @@ id = str(uuid.uuid4())
 @limiter.limit(
     "4 per second", error_message="Exceso de solicitudes, por favor intente más tarde."
 )
-def get_ps_data():
+def query_ps_data():
     try:
         response = aws_client.query(
             TableName="app_OS_v1",
@@ -109,12 +112,11 @@ def get_ps_data():
             },
             KeyConditionExpression="part_key = :v1",
         )
+        print(response["ConsumedCapacity"])
 
-        return response
+        return jsonify(transform_query_response(response["Items"], "ps_data_id")), 200
+
     except ClientError as error:
-        # Put your error handling logic here
-        # Error handling
-
         error_message = {
             "message": str(error),
             "code": error.response["Error"]["Code"],
@@ -122,97 +124,57 @@ def get_ps_data():
         return jsonify(error_message), 500
 
 
-# def deliver_ps_data():
-
-# @app.route("/psDataID", methods=["GET"])
-# @limiter.limit(
-#    "4 per second", error_message="Exceso de solicitudes, por favor intente más tarde."
-# )
-# def get_ps_data_id():
-
-#    response = aws_client.query(
-#       TableName="app_OS",
-#      ReturnConsumedCapacity="TOTAL",
-# )
-# return response
-
-
-@app.route("/appOsResources", methods=["GET"])
-def deliver_resources():
-    data = {
-        "current_data_id": str(uuid.uuid4()),
-        "users": [
-            {
-                "id": str(uuid.uuid4()),
-                "label": "Herrera Juan José",
-                "value": {
-                    "rank": "Ofl. Ayte.",
-                    "secretary": "Herrera Juan José",
+@app.route("/psDataid", methods=["GET"])
+@limiter.limit(
+    "4 per second", error_message="Exceso de solicitudes, por favor intente más tarde."
+)
+def get_ps_data_id():
+    try:
+        response = aws_client.get_item(
+            Key={
+                "part_key": {
+                    "S": "ps_data",
+                },
+                "sort_key": {
+                    "S": "ps_data_id",
                 },
             },
-            {
-                "id": str(uuid.uuid4()),
-                "label": "Alderete Vanesa",
-                "value": {
-                    "rank": "Ofl. Ayte.",
-                    "secretary": "Alderete Vanesa",
-                },
-            },
-            {
-                "id": str(uuid.uuid4()),
-                "label": "Faisal Walter",
-                "value": {
-                    "rank": "Ofl. SubAyte.",
-                    "secretary": "Faisal Walter",
-                },
-            },
-        ],
-        "instructors": [
-            {
-                "id": str(uuid.uuid4()),
-                "label": "Hector Andrés Caretta",
-                "value": {
-                    "rank": "Comisario",
-                    "instructor": "Hector Andrés Caretta",
-                },
-            }
-        ],
-        "prosecutions": [
-            {
-                "id": str(uuid.uuid4()),
-                "label": "UFI y J Nro. 1",
-                "value": {
-                    "prosecution": "UFI y J Nro. 1",
-                    "prosecutor": "Dr. Francisco Furnari",
-                },
-            }
-        ],
-        "courts": [
-            {
-                "id": str(uuid.uuid4()),
-                "label": "Juzg. Gtias. Nro. 1",
-                "value": {
-                    "court": "Juzg. Gtias. Nro. 1",
-                    "judge": "Dr. Fulanito",
-                },
-            }
-        ],
-    }
-    return jsonify(data)
+            TableName="app_OS_v1",
+            ReturnConsumedCapacity="TOTAL",
+        )
+
+        print(response["ConsumedCapacity"])
+        reduced_response: Dict[str, Any] = {}
+        reduced_response["ps_data_id"] = response["Item"]["id"]["S"]
+        return jsonify(reduced_response), 200
+
+    except ClientError as error:
+        error_message = {
+            "message": str(error),
+            "code": error.response["Error"]["Code"],
+        }
+        return jsonify(error_message), 500
 
 
 @app.route("/", methods=["POST", "GET"])
 def appOs():
+    # Uncomment when deploy to App Engine
+    # assertion = user()
+    # if assertion is None:
+    #    message = (
+    #        "La autenticación ha fallado. No se proporcionó una afirmación IAP válida."
+    #    )
+    #    code = "Afirmación IAP inválida"
+    #    return render_template("500.html", message=message, code=code), 500
     if request.method == "POST":
         # record the user
-
-        user = request.get_json().get("user")
-        if isinstance(user, str):
-            # hacer algo con el user (es un string)
+        currentUser = request.get_json().get("user")
+        # Verify if currentUser is a string
+        if isinstance(currentUser, str):
             response = make_response(f"The Cookie has been Set")
             response.set_cookie(
                 COOKIE_NAME,
-                value=user,
+                value=currentUser,
                 max_age=COOKIE_MAX_AGE,
                 httponly=False,
                 secure=True,
@@ -221,9 +183,14 @@ def appOs():
             return response
         else:
             # manejar el caso en que user es None o no es un string
-            return render_template("ServerError.html")
-    page = render_template("index.html")
-    return page
+            error_message = {
+                "message": "El valor de usuario enviado es de tipo None o no es un string",
+                "code": "Usuario no válido",
+            }
+            return jsonify(error_message), 500
+    else:
+        page = render_template("index.html")
+        return page
 
 
 @app.route("/privacy", methods=["GET"])
@@ -247,6 +214,12 @@ def catch_all(path):
         # Puedes devolver un error 404 o redireccionar a una página de error, por ejemplo.
         page = render_template("404.html")
         return page, 404
+
+
+@app.errorhandler(429)
+def handle_request_error(error):
+    page = render_template("429.html")
+    return page, 429
 
 
 if __name__ == "__main__":
