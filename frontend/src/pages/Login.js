@@ -59,8 +59,7 @@ const Login = () => {
   return (
     <Container>
       <StyledPaper>
-        <Typography variant='h2'>Seleccione su usuario</Typography>
-
+        <Typography variant='h2'>Seleccione su usuario.</Typography>
         <StyledSelect
           value={secretary}
           onChange={handleChange}
