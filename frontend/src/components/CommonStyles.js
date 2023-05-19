@@ -238,7 +238,7 @@ const TextField = styled(TextFieldOriginal)(({ theme }) => ({
 }));
 
 const Button = styled(ButtonOriginal)(({ theme }) => ({
-  width: "300px",
+  //width: "300px",
   height: "40px",
   borderRadius: "0px",
   padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
