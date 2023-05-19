@@ -17,7 +17,7 @@ from jose import jwt
 import os
 import requests
 
-KEYS = None     # Cached public keys for verification
+KEYS = None  # Cached public keys for verification
 AUDIENCE = None  # Cached value requiring information from metadata server
 
 
@@ -26,7 +26,7 @@ def keys():
     global KEYS
 
     if KEYS is None:
-        resp = requests.get('https://www.gstatic.com/iap/verify/public_key')
+        resp = requests.get("https://www.gstatic.com/iap/verify/public_key")
         KEYS = resp.json()
 
     return KEYS
@@ -37,17 +37,16 @@ def audience():
     global AUDIENCE
 
     if AUDIENCE is None:
-        project_id = os.getenv('GOOGLE_CLOUD_PROJECT', None)
+        project_id = os.getenv("GOOGLE_CLOUD_PROJECT", None)
 
-        endpoint = 'http://metadata.google.internal'
-        path = '/computeMetadata/v1/project/numeric-project-id'
+        endpoint = "http://metadata.google.internal"
+        path = "/computeMetadata/v1/project/numeric-project-id"
         response = requests.get(
-            '{}/{}'.format(endpoint, path),
-            headers={'Metadata-Flavor': 'Google'}
+            "{}/{}".format(endpoint, path), headers={"Metadata-Flavor": "Google"}
         )
         project_number = response.json()
 
-        AUDIENCE = '/projects/{}/apps/{}'.format(project_number, project_id)
+        AUDIENCE = "/projects/{}/apps/{}".format(project_number, project_id)
 
     return AUDIENCE
 
@@ -60,15 +59,12 @@ def audience():
 # would indicates bypass of IAP or inability to fetch KEYS.
 def user():
     # Requests coming through IAP have special headers
-    assertion = request.headers.get('X-Goog-IAP-JWT-Assertion')
-    if assertion is None:   # Request did not come through IAP
-        raise ValueError(
-        'La autenticación ha fallado. No se proporcionó una afirmación IAP válida.')
+    assertion = request.headers.get("X-Goog-IAP-JWT-Assertion")
 
-    info = jwt.decode(
-        assertion,
-        keys(),
-        algorithms=['ES256'],
-        audience=audience()
-    )
-    return info['email'], info['sub']
+    if assertion is None:  # Request did not come through IAP
+        # manejar el caso en que user es None o no es un string
+        print("assertion: ", assertion)
+        return None
+
+    info = jwt.decode(assertion, keys(), algorithms=["ES256"], audience=audience())
+    return info["email"], info["sub"]
