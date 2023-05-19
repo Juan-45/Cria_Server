@@ -73,7 +73,7 @@ module.exports = {
       main: path.resolve(__dirname, "./src/main/"),
       theme: path.resolve(__dirname, "./src/theme/"),
       pages: path.resolve(__dirname, "./src/pages/"),
-      //context: path.resolve(__dirname, "./src/context/"),
+      context: path.resolve(__dirname, "./src/context/"),
       helpers: path.resolve(__dirname, "./src/helpers/"),
       assets: path.resolve(__dirname, "./src/assets/"),
     },
