@@ -53,11 +53,19 @@ const CloseButton = styled(Button)(({ theme }) => ({
   marginTop: theme.spacing(3),
 }));
 
-const ErrorPopUp = ({ errorCondition, errorData }) => {
+const ErrorPopUp = ({
+  errorCondition,
+  errorData,
+  isRequestType,
+  shouldResetSite,
+}) => {
   const [error, setError] = useState(false);
 
   const closePopUp = () => setError(false);
 
+  const popUpHeader = shouldResetSite
+    ? "Ha ocurrido un error y debe resetear el sitio. Presione la tecla f5"
+    : "Ha ocurrido un error";
   useEffect(() => {
     if (errorCondition) {
       setError(true);
@@ -67,13 +75,17 @@ const ErrorPopUp = ({ errorCondition, errorData }) => {
     <RenderIf condition={error}>
       <FixedContainer>
         <PopUp>
-          <PopUpHeader variant='h2'>Ha ocurrido un error</PopUpHeader>
-          <ErrorText variant='subtitle1'>{errorData.title}</ErrorText>
+          <PopUpHeader variant="h2">{popUpHeader}</PopUpHeader>
+          <ErrorText variant="subtitle1">{errorData.title}</ErrorText>
           <ErrorText>{errorData.message}</ErrorText>
-          <ErrorText>{`Estado: ${errorData.status}`}</ErrorText>
-          <ErrorText>{`Código: ${errorData.code}`}</ErrorText>
-          <ErrorText>{`URL: ${errorData.url}`}</ErrorText>
-          <CloseButton onClick={closePopUp}>Cerrar</CloseButton>
+          <RenderIf condition={isRequestType}>
+            <ErrorText>{`Estado: ${errorData.status}`}</ErrorText>
+            <ErrorText>{`Código: ${errorData.code}`}</ErrorText>
+            <ErrorText>{`URL: ${errorData.url}`}</ErrorText>
+          </RenderIf>
+          <RenderIf condition={!shouldResetSite}>
+            <CloseButton onClick={closePopUp}>Cerrar</CloseButton>
+          </RenderIf>
         </PopUp>
       </FixedContainer>
     </RenderIf>
@@ -82,6 +94,8 @@ const ErrorPopUp = ({ errorCondition, errorData }) => {
 
 ErrorPopUp.defaultProps = {
   errorCondition: false,
+  isRequestType: false,
+  shouldResetSite: false,
   errorData: {
     title: "_",
     status: "_",
@@ -93,6 +107,8 @@ ErrorPopUp.defaultProps = {
 
 ErrorPopUp.proptypes = {
   error: proptypes.bool.isRequired,
+  isRequestType: proptypes.bool.isRequired,
+  shouldResetSite: proptypes.bool.isRequired,
   errorData: proptypes.shape({
     title: proptypes.string,
     status: proptypes.string,
