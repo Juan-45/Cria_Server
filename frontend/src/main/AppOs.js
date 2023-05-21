@@ -8,10 +8,11 @@ import MainContainer from "components/MainContainer";
 import PageRender from "components/PageRender";
 import PageContainer from "components/PageContainer";
 import ScrollToTop from "components/ScrollToTop";
-import ErrorPopUp from "components/wrappers/ErrorPopUp";
+import ErrorPopUp from "components/ErrorPopUp";
 import Login from "pages/Login";
 import Home from "pages/Home";
 import Home2 from "pages/Home2";
+import useLocalStorage from "hooks/useLocalStorage";
 
 const AppOs = () => {
   const [errorData, setErrorData] = useState({});
@@ -21,9 +22,9 @@ const AppOs = () => {
   const { isRootLocation } = useCheckSession();
   const requestGet = useAxios("get");
   //const requestGet1 = useAxios("get");
-
+  const { simulateErr } = useLocalStorage();
   //Probar capacidad de almacenamiento localStorage, en diferentes circunstancias
-
+  simulateErr();
   const navigationOptions = [
     {
       to: "/",
@@ -78,7 +79,7 @@ const AppOs = () => {
       console.log("Axios error data", data);
       //  console.log("Axios error data", data1);
       if (data.error) {
-        setErrorData(data);
+        setErrorData({ ...data, shouldResetSite: true });
       }
     };
     request_ps_data();
@@ -92,6 +93,8 @@ const AppOs = () => {
             <ErrorPopUp
               errorCondition={errorData.error}
               errorData={errorData}
+              isRequestType={true}
+              shouldResetSite={errorData.shouldResetSite}
             />
             <PageContainer
               navBarOptions={navBarOptions}
