@@ -59,6 +59,7 @@ aws_client = boto3.client(
     #
 )
 
+
 app = Flask(__name__)
 
 # to-do: Configurar la clave secreta de la sesión para producción (necesaria para la firma de cookies)
@@ -113,7 +114,6 @@ def query_ps_data():
             KeyConditionExpression="part_key = :v1",
         )
         print(response["ConsumedCapacity"])
-
         return jsonify(transform_query_response(response["Items"], "ps_data_id")), 200
 
     except ClientError as error:
@@ -177,8 +177,8 @@ def appOs():
                 value=currentUser,
                 max_age=COOKIE_MAX_AGE,
                 httponly=False,
-                secure=True,
-                samesite="Strict",
+                # secure=True,
+                # samesite="Strict",
             )
             return response
         else:
