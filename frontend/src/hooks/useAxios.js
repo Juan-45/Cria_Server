@@ -11,6 +11,12 @@ const useAxios = (method) => {
 
   axios.defaults.timeout = 20000;
 
+  axios.defaults.headers.common["Content-Type"] = "application/json";
+
+  axios.defaults.headers.common["Accept"] = "application/json";
+
+  axios.defaults.responseType = "json";
+
   const axiosInstance = useCallback(
     axios.create({
       method: method,
@@ -54,7 +60,7 @@ const useAxios = (method) => {
                 status: error.request.status,
                 code: error.code,
                 message: error.message,
-                url: error.request.responseURL,
+                url: error.config.url,
                 error: true,
               };
             } else {
