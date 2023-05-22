@@ -64,8 +64,8 @@ const ErrorPopUp = ({
   const closePopUp = () => setError(false);
 
   const popUpHeader = shouldResetSite
-    ? "Ha ocurrido un error y debe resetear el sitio. Presione la tecla f5"
-    : "Ha ocurrido un error";
+    ? "Ha ocurrido un error y debe resetear el sitio. Presione la tecla f5."
+    : "Ha ocurrido un error, pero podrá seguir trabajando.";
   useEffect(() => {
     if (errorCondition) {
       setError(true);
@@ -75,8 +75,8 @@ const ErrorPopUp = ({
     <RenderIf condition={error}>
       <FixedContainer>
         <PopUp>
-          <PopUpHeader variant="h2">{popUpHeader}</PopUpHeader>
-          <ErrorText variant="subtitle1">{errorData.title}</ErrorText>
+          <PopUpHeader variant='h2'>{popUpHeader}</PopUpHeader>
+          <ErrorText variant='subtitle1'>{errorData.title}</ErrorText>
           <ErrorText>{errorData.message}</ErrorText>
           <RenderIf condition={isRequestType}>
             <ErrorText>{`Estado: ${errorData.status}`}</ErrorText>
