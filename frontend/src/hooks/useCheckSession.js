@@ -41,7 +41,10 @@ const useCheckSession = () => {
 
     if (isRoot && isUserLoggedIn) {
       navigate(HOME_PATH);
-    } else if (!isRoot && !isUserLoggedIn && !location.pathname === _404_PATH) {
+    } else if (
+      !isRoot &&
+      !isUserLoggedIn /*&& !location.pathname === _404_PATH*/
+    ) {
       navigate(ROOT_PATH);
     }
   }, [location]);
