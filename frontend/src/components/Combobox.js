@@ -1,36 +1,28 @@
 ﻿import { TextField, Autocomplete } from "@mui/material";
-import useComboBox from "components/comboBox/useComboBox";
 
 const Combobox = ({
   onChange,
-  shouldReset,
+  value,
   label,
   error,
   helperText,
   required,
   name,
   options,
-  valueId,
   ...props
 }) => {
-  const { comboBoxHandler, value } = useComboBox({
-    onChange,
-    shouldReset,
-    options,
-    valueId,
-  });
-
   return (
     <Autocomplete
       value={value}
-      onChange={comboBoxHandler}
-      isOptionEqualToValue={(option, value) => option.Id === value.id}
+      onChange={onChange}
+      isOptionEqualToValue={(option, value) => option.id === value.id}
+      getOptionLabel={(option) => option.val}
       //  autoSelect={true}
       openOnFocus={true}
       renderOption={(props, option) => {
         return (
           <li {...props} key={option.id}>
-            {option.label}
+            {option.val}
           </li>
         );
       }}
@@ -47,6 +39,7 @@ const Combobox = ({
             error={error}
             helperText={helperText}
             required={required}
+            name={name}
           />
         );
       }}
