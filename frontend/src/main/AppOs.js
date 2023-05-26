@@ -1,66 +1,75 @@
+import { useState, useMemo, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import useCheckSession from "hooks/useCheckSession";
-import useGet_ps_data from "hooks/useGet_ps_data";
-import { useState } from "react";
-import Context from "context/Context";
-import { save_ps_data, load_data as load_ps_data } from "helpers/localStorage";
+import useCloseSession from "hooks/useCloseSession";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { theme } from "theme/theme";
 import MainContainer from "components/MainContainer";
 import PageRender from "components/PageRender";
 import PageContainer from "components/PageContainer";
 import ScrollToTop from "components/ScrollToTop";
-import ErrorPopUp from "components/ErrorPopUp";
 import Login from "pages/Login";
+import SelectSession from "pages/SelectSession";
 import Home from "pages/Home";
 import Home2 from "pages/Home2";
-//Test
-import TEST_INTERFACE from "components/TEST_INTERFACE";
+
+const ROOT_PATH = "/";
+const SESSION_TYPE = "/sessionType";
 
 const AppOs = () => {
-  const [contextState, setContextState] = useState({
-    ps_data_ready: false,
+  const [sessionState, setSessionState] = useState({
+    currentUser: null,
+    expiredSessionMessage: "",
   });
-  const { isRootLocation } = useCheckSession();
-  //Test
-  console.log("Estado de Contexto:", contextState);
-  if (localStorage.getItem("ps_data_id")) {
-    console.log(
-      "Local Storage ps_data_id:",
-      JSON.parse(localStorage.getItem("ps_data_id"))
-    );
-    console.log(
-      "Local Storage ps_data:",
-      JSON.parse(localStorage.getItem("ps_data"))
-    );
-  }
-  //--------------------
-
-  const { errorData: request_ps_data_error } = useGet_ps_data(
-    setContextState,
-    save_ps_data,
-    load_ps_data
+  const { closingOnInterval, closingOnNavigation } = useCloseSession(
+    setSessionState,
+    sessionState.currentUser
   );
+  const { isUserLogged } = useCheckSession(
+    closingOnInterval,
+    closingOnNavigation
+  );
+  const { pathname } = useLocation();
 
-  const navigationOptions = [
-    {
-      to: "/",
-      element: <Login />,
-    },
-    {
-      to: "/home",
-      label: "Home",
-      element: <Home />,
-    },
-    {
-      to: "/home2",
-      label: "Home2",
-      element: <Home2 />,
-    },
-  ];
+  console.log("Estado de sesión:", sessionState);
 
-  const navBarOptions = navigationOptions.slice(1);
+  const navigationOptions = useMemo(() => {
+    return [
+      {
+        to: "/",
+        element: (
+          <Login
+            setSessionState={setSessionState}
+            expiredSessionMessage={sessionState.expiredSessionMessage}
+          />
+        ),
+      },
+      {
+        to: "/sessionType",
+        element: <SelectSession currentUser={sessionState.currentUser} />,
+      },
+      {
+        to: "/summaries",
+        label: "Sumarios",
+        element: <Home currentUser={sessionState.currentUser} />,
+      },
+      {
+        to: "/home2",
+        label: "Home2",
+        element: <Home2 />,
+      },
+    ];
+  }, [
+    setSessionState,
+    sessionState.expiredSessionMessage,
+    sessionState.currentUser,
+  ]);
 
-  const mapNested = (arr) => {
+  const navBarOptions = useMemo(() => {
+    return navigationOptions.slice(2);
+  }, [navigationOptions]);
+
+  const mapNested = useCallback((arr) => {
     const result = [];
 
     arr.forEach((item) => {
@@ -80,31 +89,33 @@ const AppOs = () => {
     });
 
     return result;
-  };
+  }, []);
 
-  const routesOptions = mapNested(navigationOptions);
+  const routesOptions = useMemo(() => {
+    return mapNested(navigationOptions);
+  }, [navigationOptions, mapNested]);
 
   return (
     <ThemeProvider theme={theme}>
       <ScrollToTop>
         <CssBaseline enableColorScheme injectFirst />
-        <Context.Provider value={{ setContextState, ...contextState }}>
-          <MainContainer>
-            {/* <TEST_INTERFACE context={contextState} />*/}
-            <ErrorPopUp
-              errorCondition={request_ps_data_error.error}
-              errorData={request_ps_data_error}
-              isRequestType={true}
-              shouldResetSite={request_ps_data_error.shouldResetSite}
+        <MainContainer>
+          <PageContainer
+            navBarOptions={navBarOptions}
+            hideNavBar={
+              pathname === ROOT_PATH ||
+              !isUserLogged ||
+              pathname === SESSION_TYPE
+            }
+          >
+            <PageRender
+              routesOptions={routesOptions}
+              secondaryCondition={
+                pathname === ROOT_PATH ? !isUserLogged : isUserLogged
+              }
             />
-            <PageContainer
-              navBarOptions={navBarOptions}
-              hideNavBar={isRootLocation}
-            >
-              <PageRender routesOptions={routesOptions} />
-            </PageContainer>
-          </MainContainer>
-        </Context.Provider>
+          </PageContainer>
+        </MainContainer>
       </ScrollToTop>
     </ThemeProvider>
   );
