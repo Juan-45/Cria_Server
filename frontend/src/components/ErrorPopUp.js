@@ -1,57 +1,14 @@
 import { useState, useEffect } from "react";
 import proptypes from "prop-types";
-import { styled } from "@mui/material/styles";
-import { Box, Typography, Paper } from "@mui/material";
+import {
+  FixedContainer,
+  PopUp,
+  PopUpHeader,
+  Text,
+  ButtonContainer,
+} from "components/MessagePopUpStyles";
 import { Button } from "components/CommonStyles";
 import RenderIf from "components/RenderIf";
-
-const FixedContainer = styled(Box)(({ theme }) => ({
-  height: "100vh",
-  width: "100%",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  position: "fixed",
-  top: 0,
-  left: 0,
-  zIndex: 100,
-}));
-
-const PopUp = styled(Paper)(({ theme }) => ({
-  background: theme.palette.background.default,
-  boxShadow: theme.shadows[2],
-  padding: theme.spacing(2),
-  borderRadius: "0px",
-  borderColor: theme.palette.error.main,
-  borderWidth: "2px",
-  borderStyle: "solid",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  [theme.breakpoints.up("mobile_max_599")]: {
-    width: "500px",
-  },
-  [theme.breakpoints.down("mobile_max_599")]: {
-    width: "90%",
-  },
-}));
-
-const PopUpHeader = styled(Typography)(({ theme }) => ({
-  textAlign: "center",
-  color: theme.palette.error.main,
-  marginBottom: theme.spacing(2),
-}));
-
-const ErrorText = styled(Typography)(({ theme }) => ({
-  textAlign: "left",
-  marginBottom: theme.spacing(1),
-  width: "100%",
-}));
-
-const CloseButton = styled(Button)(({ theme }) => ({
-  marginTop: theme.spacing(3),
-}));
 
 const ErrorPopUp = ({
   errorCondition,
@@ -65,7 +22,7 @@ const ErrorPopUp = ({
 
   const popUpHeader = shouldResetSite
     ? "Ha ocurrido un error y debe resetear el sitio. Presione la tecla f5."
-    : "Ha ocurrido un error, pero podrá seguir trabajando.";
+    : "Ha ocurrido un error.";
   useEffect(() => {
     if (errorCondition) {
       setError(true);
@@ -76,15 +33,17 @@ const ErrorPopUp = ({
       <FixedContainer>
         <PopUp>
           <PopUpHeader variant='h2'>{popUpHeader}</PopUpHeader>
-          <ErrorText variant='subtitle1'>{errorData.title}</ErrorText>
-          <ErrorText>{errorData.message}</ErrorText>
+          <Text variant='subtitle1'>{errorData.title}</Text>
+          <Text>{errorData.message}</Text>
           <RenderIf condition={isRequestType}>
-            <ErrorText>{`Estado: ${errorData.status}`}</ErrorText>
-            <ErrorText>{`Código: ${errorData.code}`}</ErrorText>
-            <ErrorText>{`URL: ${errorData.url}`}</ErrorText>
+            <Text>{`Estado: ${errorData.status}`}</Text>
+            <Text>{`Código: ${errorData.code}`}</Text>
+            <Text>{`URL: ${errorData.url}`}</Text>
           </RenderIf>
           <RenderIf condition={!shouldResetSite}>
-            <CloseButton onClick={closePopUp}>Cerrar</CloseButton>
+            <ButtonContainer>
+              <Button onClick={closePopUp}>Cerrar</Button>
+            </ButtonContainer>
           </RenderIf>
         </PopUp>
       </FixedContainer>
