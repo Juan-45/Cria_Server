@@ -1,97 +1,77 @@
-import { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import Context from "context/Context";
-import { Select, Typography, Paper, MenuItem, Box } from "@mui/material";
-import { Button } from "components/CommonStyles";
+import useLogin from "hooks/useLogin";
+import useGet_ps_data from "hooks/useGet_ps_data";
+import { Typography, Paper, Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import ErrorPopUp from "components/ErrorPopUp";
+import Combobox from "components/Combobox";
+import { Button, FullscreenColumn } from "components/CommonStyles";
+
 import RenderIf from "components/RenderIf";
 import Loading from "components/Loading";
 
-const Login = () => {
-  const context = useContext(Context);
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  boxShadow: theme.shadows[2],
+}));
 
-  const Container = styled(Box)({
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    height: "100vh",
-    width: "100%",
-    justifyContent: "center",
-  });
+const SessionExpiredMessage = styled(Typography)(({ theme }) => ({
+  color: theme.palette.warning.main,
+  marginTop: theme.spacing(3),
+  textAlign: "center",
+}));
 
-  const StyledPaper = styled(Paper)(({ theme }) => ({
-    padding: theme.spacing(2),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    boxShadow: theme.shadows[2],
-  }));
+const Login = ({ setSessionState, expiredSessionMessage }) => {
+  const { errorData: request_ps_data_error, ps_data } = useGet_ps_data();
 
-  const StyledSelect = styled(Select)(({ theme }) => ({
-    marginBottom: theme.spacing(2),
-  }));
-
-  const [secretary, setSecretary] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const navigate = useNavigate();
-
-  const requestSessionCookie = (user) =>
-    axios
-      .post(
-        "/",
-        { user: user },
-        { headers: { "Content-Type": "application/json" } }
-      )
-      .then((response) => {
-        console.log("respuesta POST /", response.data);
-        navigate("/home");
-      })
-      .catch((error) => {
-        setSubmitting(false);
-        console.error(error);
-      });
-
-  const handleChange = (event) => setSecretary(event.target.value);
-
-  const handleSubmit = () => {
-    if (secretary !== "") {
-      requestSessionCookie(secretary);
-      setSubmitting(true);
-    }
-  };
+  const { selectUser, handleSubmit, fieldError, errorData, submitting } =
+    useLogin(setSessionState, ps_data);
 
   return (
-    <Container>
+    <FullscreenColumn>
+      <ErrorPopUp
+        errorCondition={errorData.error}
+        errorData={errorData}
+        isRequestType={true}
+        shouldResetSite={false}
+      />
+      <ErrorPopUp
+        errorCondition={request_ps_data_error.error}
+        errorData={request_ps_data_error}
+        isRequestType={true}
+        shouldResetSite={request_ps_data_error.shouldResetSite}
+      />
       <StyledPaper>
-        <RenderIf condition={context.ps_data_ready}>
+        <RenderIf condition={ps_data.ps_data_ready}>
           <Typography variant='h2'>Seleccione su usuario.</Typography>
-          <StyledSelect
-            value={secretary}
-            onChange={handleChange}
-            label='Secretario'
-          >
-            <MenuItem value={"Herrera Juan José_Ofl. Ayte."}>
-              Herrera Juan José
-            </MenuItem>
-            <MenuItem value={"Alderete Vanesa_Ofl. Ayte."}>
-              Alderete Vanesa
-            </MenuItem>
-            <MenuItem value={"Faisal Walter_Ofl. SubAyte."}>
-              Faisal Walter
-            </MenuItem>
-          </StyledSelect>
-          {submitting ? (
-            <Typography variant='caption'>Cargando...</Typography>
-          ) : (
+          <Combobox
+            onChange={selectUser}
+            options={ps_data.secretaries}
+            label={"Usuarios"}
+            name='select_user'
+            error={fieldError}
+            helperText={fieldError ? "Campo requerido" : null}
+            required={true}
+          />
+          <RenderIf condition={submitting}>
+            <Loading />
+          </RenderIf>
+          <RenderIf condition={!submitting}>
             <Button onClick={handleSubmit}>Ingresar</Button>
-          )}
+          </RenderIf>
         </RenderIf>
-        <RenderIf condition={!context.ps_data_ready}>
+        <RenderIf condition={!ps_data.ps_data_ready}>
           <Loading />
         </RenderIf>
       </StyledPaper>
-    </Container>
+      <RenderIf condition={expiredSessionMessage}>
+        <SessionExpiredMessage variant='h2'>
+          {expiredSessionMessage}
+        </SessionExpiredMessage>
+      </RenderIf>
+    </FullscreenColumn>
   );
 };
 
