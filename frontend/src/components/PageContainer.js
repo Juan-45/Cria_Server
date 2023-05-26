@@ -3,14 +3,14 @@ import NavBar from "components/NavBar";
 import RenderIf from "components/RenderIf";
 import { styled } from "@mui/material/styles";
 
-const PageContainer = ({ children, navBarOptions, hideNavBar }) => {
-  const Container = styled(Box)({
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  });
+const Container = styled(Box)({
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+});
 
+const PageContainer = ({ children, navBarOptions, hideNavBar }) => {
   return (
     <Container>
       <RenderIf condition={!hideNavBar}>
