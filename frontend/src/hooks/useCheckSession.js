@@ -1,30 +1,33 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const useCheckSession = () => {
+const ROOT_PATH = "/";
+const HOME_PATH = "/summaries";
+const COOKIE_NAME = "user_id";
+const INTERVAL_COOKIE_VERIFICATION = 3600000;
+
+const useCheckSession = (closingOnInterval, closingOnNavigation) => {
   const [isRootLocation, setIsRootLocation] = useState(true);
+  const [isUserLogged, setIsUserLogged] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
 
-  const ROOT_PATH = "/";
-  const HOME_PATH = "/home";
-  const _404_PATH = "/404";
-  const COOKIE_NAME = "session_id";
-  const COOKIE_VERIFICATION_INTERVAL = 6000;
-
-  const detectSessionCookie = (name) => {
+  const detectSessionCookie = useCallback(() => {
     const cookieString = document.cookie;
     const cookies = cookieString.split("; ");
     for (let i = 0; i < cookies.length; i++) {
       const [cookieName, cookieValue] = cookies[i].split("=");
-      if (cookieName === name) {
+      if (cookieName === COOKIE_NAME) {
+        setIsUserLogged(true);
         return true;
       }
     }
+    setIsUserLogged(false);
     return false;
-  };
+  }, []);
 
+  //UseEffect on each location change
   useEffect(() => {
     const detectRootLocation = () => {
       if (location.pathname === ROOT_PATH) {
@@ -37,32 +40,27 @@ const useCheckSession = () => {
     };
 
     const isRoot = detectRootLocation();
-    const isUserLoggedIn = detectSessionCookie(COOKIE_NAME);
+    const isUserLoggedIn = detectSessionCookie();
 
-    if (isRoot && isUserLoggedIn) {
+    if (isUserLoggedIn && isRoot) {
       navigate(HOME_PATH);
-    } else if (
-      !isRoot &&
-      !isUserLoggedIn /*&& !location.pathname === _404_PATH*/
-    ) {
-      navigate(ROOT_PATH);
+    } else if (!isUserLoggedIn && !isRoot) {
+      closingOnNavigation();
     }
-  }, [location]);
+  }, [location, navigate, detectSessionCookie, setIsRootLocation]);
 
+  //useEffect on each interval for automatic closing
   useEffect(() => {
     let interval;
 
     const runInterval = () =>
       setInterval(() => {
-        console.log(
-          `Han pasado ${COOKIE_VERIFICATION_INTERVAL / 1000} segundos!`
-        );
-        const isUserLoggedIn = detectSessionCookie(COOKIE_NAME);
+        const isUserLoggedIn = detectSessionCookie();
 
         if (!isUserLoggedIn) {
-          navigate(ROOT_PATH);
+          closingOnInterval();
         }
-      }, COOKIE_VERIFICATION_INTERVAL);
+      }, INTERVAL_COOKIE_VERIFICATION);
 
     if (!isRootLocation) {
       interval = runInterval();
@@ -83,10 +81,10 @@ const useCheckSession = () => {
         document.removeEventListener("keydown", resetInterval);
       };
     }
-  }, [isRootLocation, COOKIE_VERIFICATION_INTERVAL]);
+  }, [isRootLocation, navigate, detectSessionCookie]);
 
   return {
-    isRootLocation,
+    isUserLogged,
   };
 };
 

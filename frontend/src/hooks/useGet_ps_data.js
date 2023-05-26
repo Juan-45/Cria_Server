@@ -1,8 +1,13 @@
 import useAxios from "hooks/useAxios";
 import { useEffect, useState } from "react";
+import { save_ps_data, load_data as load_ps_data } from "helpers/localStorage";
 
-const useGet_ps_data = (setContextState, save_ps_data, load_ps_data) => {
+const useGet_ps_data = () => {
   const [errorData, setErrorData] = useState({});
+  const [ps_data, set_ps_data] = useState({
+    ps_data_ready: false,
+    secretaries: [],
+  });
 
   const requestGet_ps_data = useAxios("get");
   const requestGet_ps_data_id = useAxios("get");
@@ -14,18 +19,15 @@ const useGet_ps_data = (setContextState, save_ps_data, load_ps_data) => {
       });
 
       if (ps_data_response.error) {
-        console.log("Axios /psData error", ps_data_response);
         if (isUpdating) {
           setErrorData(ps_data_response);
           onError();
         } else setErrorData({ ...ps_data_response, shouldResetSite: true });
       } else {
-        console.log("Axios /psData success", ps_data_response);
-        setContextState((prevState) => ({
-          ...prevState,
-          ps_data: ps_data_response.response.data,
+        set_ps_data({
+          secretaries: ps_data_response.response.data.secretaries,
           ps_data_ready: true,
-        }));
+        });
         save_ps_data(ps_data_response.response.data);
       }
     };
@@ -40,11 +42,9 @@ const useGet_ps_data = (setContextState, save_ps_data, load_ps_data) => {
       });
 
       if (ps_data_id.error) {
-        console.log("Axios /psDataid error", ps_data_id);
         setErrorData(ps_data_id);
         onError();
       } else {
-        console.log("Axios /psDataid success", ps_data_id);
         if (ps_data_id.response.data.ps_data_id !== current_ps_data_id) {
           request_ps_data(true, onError);
         } else {
@@ -55,25 +55,25 @@ const useGet_ps_data = (setContextState, save_ps_data, load_ps_data) => {
 
     const current_ps_data_id = load_ps_data("ps_data_id");
 
-    if (current_ps_data_id) {
-      const callback = () => {
-        const ps_data = load_ps_data("ps_data");
-        if (ps_data) {
-          setContextState((prevState) => ({
-            ...prevState,
-            ps_data: ps_data,
-            ps_data_ready: true,
-          }));
-        }
-      };
+    const current_ps_data = load_ps_data("ps_data");
 
+    const callback = () => {
+      if (current_ps_data) {
+        set_ps_data({
+          secretaries: current_ps_data.secretaries,
+          ps_data_ready: true,
+        });
+      }
+    };
+
+    if (current_ps_data_id) {
       request_ps_data_id(current_ps_data_id, callback, callback);
     } else {
       request_ps_data(false);
     }
-  }, [requestGet_ps_data, requestGet_ps_data_id, setContextState]);
+  }, [requestGet_ps_data, requestGet_ps_data_id, set_ps_data, setErrorData]);
 
-  return { errorData };
+  return { errorData, ps_data };
 };
 
 export default useGet_ps_data;

@@ -1,21 +1,21 @@
 import axios from "axios";
 import { useMemo, useCallback, useEffect } from "react";
 
+const location = window.location;
+const baseUrl = location.protocol + "//" + location.host + "/";
+
+axios.defaults.baseURL = baseUrl;
+
+axios.defaults.timeout = 20000;
+
+axios.defaults.headers.common["Content-Type"] = "application/json";
+
+axios.defaults.headers.common["Accept"] = "application/json";
+
+axios.defaults.responseType = "json";
+
 const useAxios = (method) => {
   const axiosController = useMemo(() => new AbortController(), []);
-
-  var location = window.location;
-  var baseUrl = location.protocol + "//" + location.host + "/";
-
-  axios.defaults.baseURL = baseUrl;
-
-  axios.defaults.timeout = 20000;
-
-  axios.defaults.headers.common["Content-Type"] = "application/json";
-
-  axios.defaults.headers.common["Accept"] = "application/json";
-
-  axios.defaults.responseType = "json";
 
   const axiosInstance = useCallback(
     axios.create({
@@ -29,7 +29,7 @@ const useAxios = (method) => {
     (settings) =>
       axiosInstance(settings)
         .then(function (response) {
-          console.log("Response---", response);
+          //M console.log(`Response--- ${settings.url}`, response);
           //return response
           return {
             response: response,
@@ -42,7 +42,7 @@ const useAxios = (method) => {
             if (error.response) {
               // The request was made and the server responded with a status code
               // that falls out of the range of 2xx
-              console.log("Response error", error.response);
+              //M  console.log(`Response error ${settings.url}`, error.response);
               return {
                 title: "Ocurrió un error de servidor.",
                 status: error.response.status,
@@ -54,7 +54,7 @@ const useAxios = (method) => {
             } else if (error.request) {
               // The request was made but no response was received
               // `error.request` is an instance of XMLHttpRequest in the browser
-              console.log("No response error", error.request);
+              //M console.log(`No response error ${settings.url}`, error.request);
               return {
                 title: "La solicitud no obtuvo respuesta.",
                 status: error.request.status,
@@ -65,7 +65,7 @@ const useAxios = (method) => {
               };
             } else {
               // Something happened in setting up the request that triggered an Error
-              console.log("Request Error", error.message);
+              //M console.log(`Request Error ${settings.url}`, error.message);
               return {
                 title: "La solicitud no pudo ser realizada.",
                 status: "No definido",
