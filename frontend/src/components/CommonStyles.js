@@ -50,6 +50,17 @@ const LargeContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
+const FullscreenColumn = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  height: "100vh",
+  width: "100%",
+  justifyContent: "center",
+  paddingLeft: theme.spacing(2),
+  paddingRight: theme.spacing(2),
+}));
+
 const highlightCommon = {
   fontWeight: 600,
 };
@@ -248,6 +259,9 @@ const Button = styled(ButtonOriginal)(({ theme }) => ({
     background: theme.palette.secondary.medium,
     color: theme.palette.text.primary,
   },
+  "&.leftSpace": {
+    marginLeft: theme.spacing(4),
+  },
 }));
 
 const AfterSquareContainer = styled(Box)(({ theme }) => ({
@@ -298,6 +312,7 @@ export {
   FlexRowCenter,
   MediumContainer,
   LargeContainer,
+  FullscreenColumn,
   HighlightRed,
   HighlightBlue,
   StyledLink,
