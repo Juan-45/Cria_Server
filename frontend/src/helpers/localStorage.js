@@ -25,7 +25,7 @@ const saveItem = (key, value) => {
   } catch (e) {
     //Only when localStorage is full
     //This error shouldn't happen if a correct localStorage management is implemented
-    console.log("Error saving item to localStorage", e);
+    //M console.log("Error saving item to localStorage", e);
   }
 };
 
@@ -43,21 +43,80 @@ const clearLocalStorage = () => localStorage.clear();
 
 //Specific use cases helper functions
 
+//Save data to localStorage
+
 const save_ps_data = (ps_data) => {
   saveItem("ps_data", ps_data);
   saveItem("ps_data_id", ps_data["ps_data_id"]);
-  getLocalStorageSize();
+  /*getLocalStorageSize();
   getLocalStorageItemSize("ps_data");
-  getLocalStorageItemSize("ps_data_id");
+  getLocalStorageItemSize("ps_data_id");*/
 };
 
+const save_currentSession_timestamp = (key) => {
+  const currentTimestamp = Date.now();
+  saveItem(key, currentTimestamp);
+};
+
+// Load data from localStorage
 const load_data = (key) => {
   const data = loadItem(key);
   if (data) {
-    getLocalStorageSize();
-    getLocalStorageItemSize(key);
+    /*  getLocalStorageSize();
+    getLocalStorageItemSize(key);*/
     return data;
   } else return null;
 };
 
-export { save_ps_data, load_data };
+//Get localStorage keys
+
+const getCurrentSessionTimestamp_key = (user_id) =>
+  `session_${user_id}_timestamp`;
+
+const getCurrentSession_key = (user_id) => `session_${user_id}`;
+
+const getPreviousSession_Key = (user_id) => `session_${user_id}_previous`;
+
+const getCurrentUserSessionID_key = (user_id) => `session_${user_id}_ID`;
+
+// Clean localStorage for currentUser
+const clean_currentSession = (user_id) => {
+  removeItem(getCurrentSessionTimestamp_key(user_id));
+
+  removeItem(getCurrentSession_key(user_id));
+
+  removeItem(getPreviousSession_Key(user_id));
+
+  removeItem(getCurrentUserSessionID_key(user_id));
+};
+
+// Create composite session data
+
+const recycleDataSession = (user_id) => {
+  const currentSession_key = getCurrentSession_key(user_id);
+  const currentTimestamp = Date.now();
+  //Load most recent session data
+  const previousSessionData = load_data(currentSession_key);
+  //Save it as it is, previousSessionData
+  saveItem(getPreviousSession_Key(user_id), previousSessionData);
+  //Remove the old data from currentSession_key for new work
+  removeItem(currentSession_key);
+  //Reset currentUserSessionID
+  saveItem(getCurrentUserSessionID_key(user_id), 0);
+  //Reset currentSessionTimestamp
+  saveItem(getCurrentSessionTimestamp_key(user_id), currentTimestamp);
+};
+
+export {
+  saveItem,
+  save_ps_data,
+  save_currentSession_timestamp,
+  load_data,
+  clean_currentSession,
+  recycleDataSession,
+  getCurrentSessionTimestamp_key,
+  getCurrentSession_key,
+  getPreviousSession_Key,
+  getCurrentUserSessionID_key,
+  getLocalStorageSize,
+};
