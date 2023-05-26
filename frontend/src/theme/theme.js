@@ -23,8 +23,9 @@ const mobile_max_599 = "@media (max-width:599spx)";
 
 const palette = {
   background: {
-    transparent: "#ffffff4d",
+    transparent: { white: { main: "#ffffff4d" }, black: { main: "#0000004d" } },
   },
+  gray900: "#212121",
 };
 
 const theme = createTheme({
@@ -105,7 +106,7 @@ const theme = createTheme({
       [mobile_max_599]: {
         fontSize: "1.5rem",
       },
-      marginBottom: "32px",
+      marginBottom: "24px",
     },
     subtitle1: {
       lineHeight: 1.2,
@@ -187,7 +188,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           "&:hover": {
-            background: palette.background.transparent,
+            background: palette.background.transparent.white.main,
           },
         },
       },
@@ -202,6 +203,18 @@ const theme = createTheme({
       defaultProps: {
         disablePortal: true,
       },
+      styleOverrides: {
+        root: {
+          width: "100%",
+          marginBottom: "16px",
+          "& .MuiAutocomplete-popupIndicator": {
+            color: palette.gray900,
+          },
+          "& .MuiAutocomplete-clearIndicator": {
+            color: palette.gray900,
+          },
+        },
+      },
     },
     MuiAccordion: {
       defaultProps: {
@@ -210,5 +223,5 @@ const theme = createTheme({
     },
   },
 });
-console.log("TEMA", theme);
+//M console.log("TEMA", theme);
 export { theme };
