@@ -37,8 +37,8 @@ from botocore.exceptions import ClientError
 from botocore.config import Config
 
 
-COOKIE_MAX_AGE = 10  # 3600
-COOKIE_NAME = "session_id"
+COOKIE_MAX_AGE = 3600  # 3600
+COOKIE_NAME = "user_id"
 REQUEST_TIMEOUT = 20
 MAX_ATTEMPS = 5
 
@@ -74,7 +74,7 @@ def get_user():
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=["10 per minute", "4 per second"],
+    default_limits=["100 per minute", "4 per second"],
 )
 limiter.init_app(app)
 
@@ -168,13 +168,13 @@ def appOs():
     #    return render_template("500.html", message=message, code=code), 500
     if request.method == "POST":
         # record the user
-        currentUser = request.get_json().get("user")
+        currentUserId = request.get_json().get("userId")
         # Verify if currentUser is a string
-        if isinstance(currentUser, str):
-            response = make_response(f"The Cookie has been Set")
+        if isinstance(currentUserId, str):
+            response = make_response(jsonify({"user_id": currentUserId}))
             response.set_cookie(
                 COOKIE_NAME,
-                value=currentUser,
+                value=currentUserId,
                 max_age=COOKIE_MAX_AGE,
                 httponly=False,
                 # secure=True,
@@ -200,7 +200,7 @@ def show_policy():
 
 
 # Allowed Client Side Routing paths
-allowed_paths = ["home", "home2"]
+allowed_paths = ["sessionType", "summaries", "home2"]
 
 
 @app.route("/", defaults={"path": ""})
