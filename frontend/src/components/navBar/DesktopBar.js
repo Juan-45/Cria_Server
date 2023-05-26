@@ -4,6 +4,7 @@ import {
 } from "components/navBar/Styles";
 import LinkDesktop from "components/navBar/desktopBar/LinkDesktop";
 import NavMenuDesktop from "components/navBar/desktopBar/NavMenuDesktop";
+import Options from "components/navBar/desktopBar/Options";
 import { useLocation } from "react-router-dom";
 import { matchCurrentPath } from "helpers/matchCurrentPath";
 
@@ -34,7 +35,12 @@ const DesktopBar = ({ navigationOptions }) => {
     } else return <></>;
   });
 
-  return <NavItemsDesktopContainer>{links}</NavItemsDesktopContainer>;
+  return (
+    <>
+      <NavItemsDesktopContainer>{links}</NavItemsDesktopContainer>
+      <Options />
+    </>
+  );
 };
 
 export default DesktopBar;
