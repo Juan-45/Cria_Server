@@ -154,7 +154,7 @@ const StyledItemTitle = styled(Typography)(({ theme }) =>
 );
 
 const ItemTitle = ({ children, ...props }) => (
-  <StyledItemTitle variant='h2' {...props}>
+  <StyledItemTitle variant="h2" {...props}>
     {children}
   </StyledItemTitle>
 );
@@ -249,7 +249,7 @@ const TextField = styled(TextFieldOriginal)(({ theme }) => ({
 }));
 
 const Button = styled(ButtonOriginal)(({ theme }) => ({
-  //width: "300px",
+  minWidth: "100px",
   height: "40px",
   borderRadius: "0px",
   padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
