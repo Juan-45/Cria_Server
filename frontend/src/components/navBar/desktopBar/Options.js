@@ -87,10 +87,8 @@ const Options = () => {
         onCancel={handleLogoutWithoutSaving}
         title={"Existen datos que puede guardar."}
         message={
-          "Existen datos de sumarios, inspecciones de calabozo o conteo de detenidos. ¿Desea guardarlos en archivo?"
+          "Existen datos de sumarios, inspecciones de calabozo o conteo de detenidos. ¿Desea que estos datos se guarden mediante archivo?"
         }
-        acceptText='Guardar y cerrar'
-        cancelText='Cerrar sesión'
       />
       <InfoPopUp
         open={openInfo}
@@ -101,21 +99,21 @@ const Options = () => {
         }
       />
       <OptionsButton
-        aria-label='account_options'
-        size='large'
+        aria-label="account_options"
+        size="large"
         disableRipple={true}
         onClick={handleClick}
         open={openMenu}
       >
-        <SettingsIcon className='options_icon' fontSize='inherit' />
-        <StyledList open={openMenu} className='options_list'>
+        <SettingsIcon className="options_icon" fontSize="inherit" />
+        <StyledList open={openMenu} className="options_list">
           <StyledItem onClick={handleSave}>
             Guardar datos
-            <SaveIcon className='item_icon' />
+            <SaveIcon className="item_icon" />
           </StyledItem>
           <StyledItem onClick={handleLogout}>
             Cerrar sesión
-            <LogoutIcon className='item_icon' />
+            <LogoutIcon className="item_icon" />
           </StyledItem>
         </StyledList>
       </OptionsButton>
