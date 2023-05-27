@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import proptypes from "prop-types";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   FixedContainer,
   PopUp,
   PopUpHeader,
   Text,
-  ButtonContainer,
+  CloseButton,
 } from "components/MessagePopUpStyles";
-import { Button } from "components/CommonStyles";
 import RenderIf from "components/RenderIf";
 
 const ErrorPopUp = ({
@@ -18,7 +18,7 @@ const ErrorPopUp = ({
 }) => {
   const [error, setError] = useState(false);
 
-  const closePopUp = () => setError(false);
+  const handleClose = () => setError(false);
 
   const popUpHeader = shouldResetSite
     ? "Ha ocurrido un error y debe resetear el sitio. Presione la tecla f5."
@@ -32,18 +32,18 @@ const ErrorPopUp = ({
     <RenderIf condition={error}>
       <FixedContainer>
         <PopUp>
-          <PopUpHeader variant='h2'>{popUpHeader}</PopUpHeader>
-          <Text variant='subtitle1'>{errorData.title}</Text>
+          <RenderIf condition={!shouldResetSite}>
+            <CloseButton onClick={handleClose} disableRipple={true}>
+              <CloseIcon size="small" />
+            </CloseButton>
+          </RenderIf>
+          <PopUpHeader variant="h2">{popUpHeader}</PopUpHeader>
+          <Text variant="subtitle1">{errorData.title}</Text>
           <Text>{errorData.message}</Text>
           <RenderIf condition={isRequestType}>
             <Text>{`Estado: ${errorData.status}`}</Text>
             <Text>{`Código: ${errorData.code}`}</Text>
             <Text>{`URL: ${errorData.url}`}</Text>
-          </RenderIf>
-          <RenderIf condition={!shouldResetSite}>
-            <ButtonContainer>
-              <Button onClick={closePopUp}>Cerrar</Button>
-            </ButtonContainer>
           </RenderIf>
         </PopUp>
       </FixedContainer>

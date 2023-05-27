@@ -1,5 +1,6 @@
 import { styled } from "@mui/material/styles";
-import { Box, Typography, Paper } from "@mui/material";
+import { Box, Typography, Paper, IconButton } from "@mui/material";
+import { TRANSITION_TIME } from "components/CommonStyles";
 
 const FixedContainer = styled(Box)(({ theme }) => ({
   height: "100vh",
@@ -18,7 +19,8 @@ const FixedContainer = styled(Box)(({ theme }) => ({
 const PopUp = styled(Paper)(({ theme }) => ({
   background: theme.palette.background.default,
   boxShadow: theme.shadows[2],
-  padding: theme.spacing(2),
+  padding: theme.spacing(4),
+  paddingBottom: theme.spacing(2),
   borderRadius: "0px",
   borderColor: theme.palette.error.main,
   borderWidth: "2px",
@@ -26,6 +28,7 @@ const PopUp = styled(Paper)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "start",
+  position: "relative",
   [theme.breakpoints.up("mobile_max_599")]: {
     width: "500px",
   },
@@ -69,4 +72,19 @@ const ButtonContainer = styled(Box)(({ theme }) => ({
   width: "100%",
 }));
 
-export { FixedContainer, PopUp, PopUpHeader, Text, ButtonContainer };
+const CloseButton = styled(IconButton)(({ theme }) => ({
+  position: "absolute",
+  padding: "0px",
+  top: theme.spacing(0.5),
+  right: theme.spacing(0.5),
+  color: theme.palette.text.primary,
+}));
+
+export {
+  FixedContainer,
+  PopUp,
+  PopUpHeader,
+  Text,
+  ButtonContainer,
+  CloseButton,
+};

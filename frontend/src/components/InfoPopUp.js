@@ -1,26 +1,26 @@
+import CloseIcon from "@mui/icons-material/Close";
 import {
   FixedContainer,
   PopUp,
   PopUpHeader,
   Text,
-  ButtonContainer,
+  CloseButton,
 } from "components/MessagePopUpStyles";
-import { Button } from "components/CommonStyles";
 import RenderIf from "components/RenderIf";
 
 const InfoPopUp = ({ open, setOpen, title, message }) => {
-  const handleCancel = () => setOpen(false);
+  const handleClose = () => setOpen(false);
   return (
     <RenderIf condition={open}>
       <FixedContainer>
-        <PopUp className='info'>
-          <PopUpHeader variant='h2' className='info'>
+        <PopUp className="info">
+          <CloseButton onClick={handleClose} disableRipple={true}>
+            <CloseIcon size="small" />
+          </CloseButton>
+          <PopUpHeader variant="h2" className="info">
             {title}
           </PopUpHeader>
-          <Text className='center'>{message}</Text>
-          <ButtonContainer>
-            <Button onClick={handleCancel}>Cerrar</Button>
-          </ButtonContainer>
+          <Text className="center">{message}</Text>
         </PopUp>
       </FixedContainer>
     </RenderIf>

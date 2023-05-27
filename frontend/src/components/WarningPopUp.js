@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   FixedContainer,
   PopUp,
   PopUpHeader,
   Text,
   ButtonContainer,
+  CloseButton,
 } from "components/MessagePopUpStyles";
 import { Button } from "components/CommonStyles";
 import RenderIf from "components/RenderIf";
@@ -16,23 +17,24 @@ const WarningPopUp = ({
   message,
   onAccept,
   onCancel,
-  acceptText,
-  cancelText,
 }) => {
-  const handleCancel = () => setOpen(false);
-  //agregar boton cruz para cerrar ventana de mensaje, independientemente del tipo de mensaje
+  const handleClose = () => setOpen(false);
+
   return (
     <RenderIf condition={open}>
       <FixedContainer>
-        <PopUp className='warning'>
-          <PopUpHeader variant='h2' className='warning'>
+        <PopUp className="warning">
+          <CloseButton onClick={handleClose} disableRipple={true}>
+            <CloseIcon size="small" />
+          </CloseButton>
+          <PopUpHeader variant="h2" className="warning">
             {title}
           </PopUpHeader>
-          <Text className='center'>{message}</Text>
+          <Text className="center">{message}</Text>
           <ButtonContainer>
-            <Button onClick={onAccept}>{acceptText}</Button>
-            <Button onClick={onCancel} className='leftSpace'>
-              {cancelText}
+            <Button onClick={onAccept}>Si</Button>
+            <Button onClick={onCancel} className="leftSpace">
+              No
             </Button>
           </ButtonContainer>
         </PopUp>
