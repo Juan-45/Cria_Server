@@ -6,7 +6,11 @@ const HOME_PATH = "/summaries";
 const COOKIE_NAME = "user_id";
 const INTERVAL_COOKIE_VERIFICATION = 3600000;
 
-const useCheckSession = (closingOnInterval, closingOnNavigation) => {
+const useCheckSession = (
+  closingOnInterval,
+  closingOnNavigation,
+  setSessionState
+) => {
   const [isRootLocation, setIsRootLocation] = useState(true);
   const [isUserLogged, setIsUserLogged] = useState(false);
 
@@ -43,6 +47,13 @@ const useCheckSession = (closingOnInterval, closingOnNavigation) => {
     const isUserLoggedIn = detectSessionCookie();
 
     if (isUserLoggedIn && isRoot) {
+      /*  setSessionState({
+        currentUser: ps_data.secretaries.find(
+          (secretary) =>
+            secretary.id === currentUserRequest.response.data.user_id
+        ),
+        expiredSessionMessage: "",
+      });*/
       navigate(HOME_PATH);
     } else if (!isUserLoggedIn && !isRoot) {
       closingOnNavigation();

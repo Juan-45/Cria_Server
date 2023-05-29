@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   load_data,
   getCurrentSessionTimestamp_key,
+  save_loggedUser_data,
 } from "helpers/localStorage";
 
 const useLogin = (setSessionState, ps_data) => {
@@ -55,12 +56,13 @@ const useLogin = (setSessionState, ps_data) => {
       setSubmitting(false);
       setErrorData(currentUserRequest);
     } else {
+      const currentUser = ps_data.secretaries.find(
+        (secretary) => secretary.id === currentUserRequest.response.data.user_id
+      );
+      save_loggedUser_data(currentUser);
       setSubmitting(false);
       setSessionState({
-        currentUser: ps_data.secretaries.find(
-          (secretary) =>
-            secretary.id === currentUserRequest.response.data.user_id
-        ),
+        currentUser,
         expiredSessionMessage: "",
       });
       manageSessionType(currentUserRequest.response.data.user_id);

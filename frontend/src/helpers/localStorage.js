@@ -17,7 +17,7 @@ const getLocalStorageItemSize = (key) => {
   console.log(`Item ${key} compressed size: ${itemSize} Kb`);
 };
 
-//LocalStorage helper functions
+//--------LocalStorage helper functions
 
 const saveItem = (key, value) => {
   try {
@@ -41,34 +41,15 @@ const removeItem = (key) => localStorage.removeItem(key);
 
 const clearLocalStorage = () => localStorage.clear();
 
-//Specific use cases helper functions
-
-//Save data to localStorage
-
-const save_ps_data = (ps_data) => {
-  saveItem("ps_data", ps_data);
-  saveItem("ps_data_id", ps_data["ps_data_id"]);
-  /*getLocalStorageSize();
-  getLocalStorageItemSize("ps_data");
-  getLocalStorageItemSize("ps_data_id");*/
-};
-
-const save_currentSession_timestamp = (key) => {
-  const currentTimestamp = Date.now();
-  saveItem(key, currentTimestamp);
-};
-
-// Load data from localStorage
+//--------Load data from localStorage
 const load_data = (key) => {
   const data = loadItem(key);
   if (data) {
-    /*  getLocalStorageSize();
-    getLocalStorageItemSize(key);*/
     return data;
   } else return null;
 };
 
-//Get localStorage keys
+//--------Get localStorage keys
 
 const getCurrentSessionTimestamp_key = (user_id) =>
   `session_${user_id}_timestamp`;
@@ -79,7 +60,24 @@ const getPreviousSession_Key = (user_id) => `session_${user_id}_previous`;
 
 const getCurrentUserSessionID_key = (user_id) => `session_${user_id}_ID`;
 
-// Clean localStorage for currentUser
+//--------Save data to localStorage
+
+const save_ps_data = (ps_data) => {
+  saveItem("ps_data", ps_data);
+  saveItem("ps_data_id", ps_data["ps_data_id"]);
+};
+
+const save_currentSession_timestamp = (user_id) => {
+  const currentTimestamp = Date.now();
+  saveItem(getCurrentSessionTimestamp_key(user_id), currentTimestamp);
+};
+
+const save_loggedUser_data = (loggedUser_data) => {
+  const key_loggedUser_data = "loggedUser_data";
+  saveItem(key_loggedUser_data, loggedUser_data);
+};
+
+//--------Clean localStorage for currentUser
 const clean_currentSession = (user_id) => {
   removeItem(getCurrentSessionTimestamp_key(user_id));
 
@@ -90,7 +88,7 @@ const clean_currentSession = (user_id) => {
   removeItem(getCurrentUserSessionID_key(user_id));
 };
 
-// Create composite session data
+//--------Create composite session data
 
 const recycleDataSession = (user_id) => {
   const currentSession_key = getCurrentSession_key(user_id);
@@ -111,11 +109,12 @@ export {
   saveItem,
   save_ps_data,
   save_currentSession_timestamp,
+  save_loggedUser_data,
   load_data,
   clean_currentSession,
   recycleDataSession,
-  getCurrentSessionTimestamp_key,
   getCurrentSession_key,
+  getCurrentSessionTimestamp_key,
   getPreviousSession_Key,
   getCurrentUserSessionID_key,
   getLocalStorageSize,
