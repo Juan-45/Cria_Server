@@ -21,13 +21,12 @@ const AppOs = () => {
     currentUser: null,
     expiredSessionMessage: "",
   });
-  const { closingOnInterval, closingOnNavigation } = useCloseSession(
-    setSessionState,
-    sessionState.currentUser
-  );
+  const { closingOnInterval, closingOnNavigation, manualClosing } =
+    useCloseSession(setSessionState, sessionState.currentUser);
   const { isUserLogged } = useCheckSession(
     closingOnInterval,
-    closingOnNavigation
+    closingOnNavigation,
+    setSessionState
   );
   const { pathname } = useLocation();
 
@@ -107,6 +106,7 @@ const AppOs = () => {
               !isUserLogged ||
               pathname === SESSION_TYPE
             }
+            handleManualClosing={manualClosing}
           >
             <PageRender
               routesOptions={routesOptions}
