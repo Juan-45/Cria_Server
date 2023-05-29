@@ -1,16 +1,19 @@
 import { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { load_data } from "helpers/localStorage";
 
 const ROOT_PATH = "/";
 const HOME_PATH = "/summaries";
 const COOKIE_NAME = "user_id";
 const INTERVAL_COOKIE_VERIFICATION = 3600000;
 
-const useCheckSession = (
+const useCheckSession = ({
   closingOnInterval,
   closingOnNavigation,
-  setSessionState
-) => {
+  closingOnNewLoginDetected,
+  setSessionState,
+  isCurrentUser_null,
+}) => {
   const [isRootLocation, setIsRootLocation] = useState(true);
   const [isUserLogged, setIsUserLogged] = useState(false);
 
@@ -47,20 +50,45 @@ const useCheckSession = (
     const isUserLoggedIn = detectSessionCookie();
 
     if (isUserLoggedIn && isRoot) {
-      /*  setSessionState({
-        currentUser: ps_data.secretaries.find(
-          (secretary) =>
-            secretary.id === currentUserRequest.response.data.user_id
-        ),
-        expiredSessionMessage: "",
-      });*/
       navigate(HOME_PATH);
+    } else if (isUserLoggedIn && isCurrentUser_null) {
+      const loggedUser_data = load_data("loggedUser_data");
+      setSessionState({
+        currentUser: loggedUser_data,
+        expiredSessionMessage: "",
+      });
     } else if (!isUserLoggedIn && !isRoot) {
       closingOnNavigation();
     }
-  }, [location, navigate, detectSessionCookie, setIsRootLocation]);
+  }, [
+    location,
+    navigate,
+    detectSessionCookie,
+    closingOnNavigation,
+    setIsRootLocation,
+    isCurrentUser_null,
+  ]);
 
-  //useEffect on each interval for automatic closing
+  //useEffect to add listener to detect loggedUser_data's changes in localStorage
+  useEffect(() => {
+    const handleStorageChange = (event) => {
+      if (
+        event.key === "loggedUser_data" &&
+        event.newValue === null &&
+        !isCurrentUser_null
+      ) {
+        closingOnNewLoginDetected();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, [isCurrentUser_null, closingOnNewLoginDetected]);
+
+  //useEffect to add interval for automatic closing
   useEffect(() => {
     let interval;
 
@@ -92,7 +120,7 @@ const useCheckSession = (
         document.removeEventListener("keydown", resetInterval);
       };
     }
-  }, [isRootLocation, navigate, detectSessionCookie]);
+  }, [isRootLocation, navigate, detectSessionCookie, closingOnInterval]);
 
   return {
     isUserLogged,

@@ -105,12 +105,17 @@ const recycleDataSession = (user_id) => {
   saveItem(getCurrentSessionTimestamp_key(user_id), currentTimestamp);
 };
 
+// Clean loggedUser_data
+
+const clean_loggedUser_data = () => removeItem("loggedUser_data");
+
 export {
   saveItem,
   save_ps_data,
   save_currentSession_timestamp,
   save_loggedUser_data,
   load_data,
+  clean_loggedUser_data,
   clean_currentSession,
   recycleDataSession,
   getCurrentSession_key,

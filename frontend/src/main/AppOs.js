@@ -21,13 +21,23 @@ const AppOs = () => {
     currentUser: null,
     expiredSessionMessage: "",
   });
-  const { closingOnInterval, closingOnNavigation, manualClosing } =
-    useCloseSession(setSessionState, sessionState.currentUser);
-  const { isUserLogged } = useCheckSession(
+
+  const {
     closingOnInterval,
     closingOnNavigation,
-    setSessionState
-  );
+    closingOnNewLoginDetected,
+    manualClosing,
+  } = useCloseSession(setSessionState, sessionState.currentUser ? true : false);
+
+  const { isUserLogged } = useCheckSession({
+    closingOnInterval,
+    closingOnNavigation,
+    closingOnNewLoginDetected,
+    setSessionState,
+    isCurrentUser_null: sessionState.currentUser ? false : true,
+    //    currentUser_id: sessionState.currentUser && sessionState.currentUser.id,
+  });
+
   const { pathname } = useLocation();
 
   console.log("Estado de sesión:", sessionState);
