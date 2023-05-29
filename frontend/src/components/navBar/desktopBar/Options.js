@@ -1,12 +1,9 @@
-import useSessionOptions from "hooks/useSessionOptions";
 import { styled } from "@mui/material/styles";
-import { IconButton, List, ListItem } from "@mui/material";
+import { IconButton, List, ListItem, Typography } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import SaveIcon from "@mui/icons-material/Save";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { TRANSITION_TIME } from "components/CommonStyles";
-import WarningPopUp from "components/WarningPopUp";
-import InfoPopUp from "components/InfoPopUp";
 
 const OptionsButton = styled(IconButton, {
   shouldForwardProp: (props) => props !== "open",
@@ -64,60 +61,27 @@ const StyledList = styled(List, {
   boxShadow: theme.shadows[2],
 }));
 
-const Options = () => {
-  const {
-    handleClick,
-    handleSave,
-    handleLogout,
-    handleSaveOnLogout,
-    handleLogoutWithoutSaving,
-    setOpenInfo,
-    setOpenWarning,
-    openMenu,
-    openInfo,
-    openWarning,
-  } = useSessionOptions();
-
+const Options = ({ openMenu, handleClick, handleSave, handleLogout }) => {
   return (
-    <>
-      <WarningPopUp
-        open={openWarning}
-        setOpen={setOpenWarning}
-        onAccept={handleSaveOnLogout}
-        onCancel={handleLogoutWithoutSaving}
-        title={"Existen datos que puede guardar."}
-        message={
-          "Existen datos de sumarios, inspecciones de calabozo o conteo de detenidos. ¿Desea que estos datos se guarden mediante archivo?"
-        }
-      />
-      <InfoPopUp
-        open={openInfo}
-        setOpen={setOpenInfo}
-        title={"No existen datos para guardar."}
-        message={
-          "No existen datos de sumarios, inspecciones de calabozo o conteo de detenidos."
-        }
-      />
-      <OptionsButton
-        aria-label="account_options"
-        size="large"
-        disableRipple={true}
-        onClick={handleClick}
-        open={openMenu}
-      >
-        <SettingsIcon className="options_icon" fontSize="inherit" />
-        <StyledList open={openMenu} className="options_list">
-          <StyledItem onClick={handleSave}>
-            Guardar datos
-            <SaveIcon className="item_icon" />
-          </StyledItem>
-          <StyledItem onClick={handleLogout}>
-            Cerrar sesión
-            <LogoutIcon className="item_icon" />
-          </StyledItem>
-        </StyledList>
-      </OptionsButton>
-    </>
+    <OptionsButton
+      aria-label="account_options"
+      size="large"
+      disableRipple={true}
+      onClick={handleClick}
+      open={openMenu}
+    >
+      <SettingsIcon className="options_icon" fontSize="inherit" />
+      <StyledList open={openMenu} className="options_list">
+        <StyledItem onClick={handleSave}>
+          Guardar datos
+          <SaveIcon className="item_icon" />
+        </StyledItem>
+        <StyledItem onClick={handleLogout}>
+          Cerrar sesión
+          <LogoutIcon className="item_icon" />
+        </StyledItem>
+      </StyledList>
+    </OptionsButton>
   );
 };
 

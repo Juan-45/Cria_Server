@@ -10,11 +10,19 @@ const Container = styled(Box)({
   alignItems: "center",
 });
 
-const PageContainer = ({ children, navBarOptions, hideNavBar }) => {
+const PageContainer = ({
+  children,
+  navBarOptions,
+  hideNavBar,
+  handleManualClosing,
+}) => {
   return (
     <Container>
       <RenderIf condition={!hideNavBar}>
-        <NavBar navigationOptions={navBarOptions} />
+        <NavBar
+          navigationOptions={navBarOptions}
+          handleManualClosing={handleManualClosing}
+        />
       </RenderIf>
       {children}
     </Container>

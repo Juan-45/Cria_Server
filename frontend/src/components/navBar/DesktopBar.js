@@ -1,3 +1,6 @@
+import { useLocation } from "react-router-dom";
+import { matchCurrentPath } from "helpers/matchCurrentPath";
+import { Typography } from "@mui/material";
 import {
   NavItemContainer,
   NavItemsDesktopContainer,
@@ -5,10 +8,14 @@ import {
 import LinkDesktop from "components/navBar/desktopBar/LinkDesktop";
 import NavMenuDesktop from "components/navBar/desktopBar/NavMenuDesktop";
 import Options from "components/navBar/desktopBar/Options";
-import { useLocation } from "react-router-dom";
-import { matchCurrentPath } from "helpers/matchCurrentPath";
 
-const DesktopBar = ({ navigationOptions }) => {
+const DesktopBar = ({
+  navigationOptions,
+  openMenu,
+  handleClick,
+  handleSave,
+  handleLogout,
+}) => {
   const { pathname } = useLocation();
 
   const links = navigationOptions.map((item, index) => {
@@ -38,7 +45,12 @@ const DesktopBar = ({ navigationOptions }) => {
   return (
     <>
       <NavItemsDesktopContainer>{links}</NavItemsDesktopContainer>
-      <Options />
+      <Options
+        handleClick={handleClick}
+        handleSave={handleSave}
+        handleLogout={handleLogout}
+        openMenu={openMenu}
+      />
     </>
   );
 };

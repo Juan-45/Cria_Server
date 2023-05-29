@@ -42,7 +42,7 @@ const theme = createTheme({
     ternary: {
       light: "#f6f0e8",
       medium: "#dfd2c1",
-      main: "#956730",
+      main: "#424242",
     },
     text: {
       white: "#fff",
