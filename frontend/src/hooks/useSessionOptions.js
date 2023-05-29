@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const useSessionOptions = () => {
+const useSessionOptions = (manualClosing) => {
   const [openMenu, setOpenMenu] = useState(false);
   const [openInfo, setOpenInfo] = useState(false);
   const [openWarning, setOpenWarning] = useState(false);
@@ -23,18 +23,21 @@ const useSessionOptions = () => {
     if (/*hay datos de sesión*/ true) {
       setOpenWarning(true);
     } else {
-      //Cerrar sesión
+      manualClosing();
     }
     setOpenMenu(false);
   };
 
   const handleLogoutWithoutSaving = () => {
-    console.log("cerrar sesión");
+    console.log("solo cerrar");
+    manualClosing();
     setOpenWarning(false);
   };
 
   const handleSaveOnLogout = () => {
-    console.log("guardar y cerrar sesión");
+    console.log("guardar y cerrar");
+    //guardar datos
+    manualClosing();
     setOpenWarning(false);
   };
 
