@@ -26,11 +26,11 @@ const Home = ({ currentUser }) => {
   };
 
   return (
-    <>
+    <div style={{ paddingTop: "250px" }}>
       <h1>HOME</h1>
 
       <button onClick={onClick}>Guardar datos en LS</button>
-    </>
+    </div>
   );
 };
 
