@@ -131,30 +131,30 @@ const NavBarContainer = styled("nav", {
   shouldForwardProp: (prop) => prop !== "scrolling",
 })(({ theme, scrolling }) => ({
   display: "flex",
-  flexWrap: "nowrap",
+  flexWrap: "wrap", //"nowrap",
   position: "fixed",
   top: "0",
   left: 0,
   zIndex: "1200",
   width: "100%",
-  minWidth: "360px",
+  minWidth: "850px", //"360px",
   minHeight: "25px",
   padding: `${theme.spacing(2)} ${theme.spacing(20)}`,
   paddingTop: theme.spacing(2),
   justifyContent: "space-between",
   alignItems: "center",
   transition: "background 0.5s ease",
-  background: scrolling ? theme.palette.ternary.main : "unset",
+  background: /*scrolling ?*/ theme.palette.ternary.main /*: "unset"*/,
 
   [theme.breakpoints.down("lg")]: {
     padding: `${theme.spacing(2)} ${theme.spacing(4)}`,
   },
 
-  [theme.breakpoints.down("screen_max_850")]: {
+  /*[theme.breakpoints.down("screen_max_850")]: {
     background: theme.palette.ternary.main,
     top: "unset",
     bottom: 0,
-  },
+  },*/
 }));
 
 const StyledLink = styled(Link)(getNavItem);
