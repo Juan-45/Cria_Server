@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { deleteSessionCookie } from "helpers/cookies";
 
 const useCloseSession = (setSessionState, currentUser) => {
   const ROOT_PATH = "/";
@@ -15,6 +16,7 @@ const useCloseSession = (setSessionState, currentUser) => {
   const closingOnInterval = () => {
     navigate(ROOT_PATH);
     updateSessionState();
+    //se borra loggedUser_data de LS
     //borrar CE de SS
     //guardar datos en archivo
   };
@@ -22,14 +24,25 @@ const useCloseSession = (setSessionState, currentUser) => {
   const closingOnNavigation = () => {
     navigate(ROOT_PATH);
     updateSessionState();
+    //se borra loggedUser_data de LS
     //borrar CE de SS
   };
 
-  // closingManual
+  const manualClosing = () => {
+    navigate(ROOT_PATH);
+    setSessionState({
+      currentUser: null,
+      expiredSessionMessage: "",
+    });
+    deleteSessionCookie();
+    //se borra loggedUser_data de LS
+    //borrar CE de SS
+  };
 
   return {
     closingOnInterval,
     closingOnNavigation,
+    manualClosing,
   };
 };
 
