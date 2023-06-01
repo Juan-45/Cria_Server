@@ -3,27 +3,28 @@ import { useNavigate } from "react-router-dom";
 import { deleteSessionCookie } from "helpers/cookies";
 import { clean_loggedUser_data } from "helpers/localStorage";
 
-const useCloseSession = (setSessionState, isCurrentUser) => {
+const useCloseSession = (setSessionState, setGlobalData, isCurrentUser) => {
   const ROOT_PATH = "/";
   const navigate = useNavigate();
 
-  const updateSessionState = useCallback(
-    () =>
-      setSessionState({
-        currentUser: null,
-        expiredSessionMessage: isCurrentUser
-          ? "Su sesión ha expirado, vuelva a ingresar."
-          : "No ha iniciado sesión.",
-      }),
-    [setSessionState]
-  );
+  const updateSessionState = useCallback(() => {
+    setSessionState({
+      currentUser: null,
+      expiredSessionMessage: isCurrentUser
+        ? "Su sesión ha expirado, vuelva a ingresar."
+        : "No ha iniciado sesión.",
+    }),
+      setGlobalData({
+        session: null,
+        session_previous: null,
+      });
+  }, [setSessionState, setGlobalData, isCurrentUser, setGlobalData]);
 
   const closingOnInterval = useCallback(() => {
     navigate(ROOT_PATH);
     updateSessionState();
     clean_loggedUser_data();
     //borrar CE de SS
-    //guardar datos en archivo
   }, [navigate, updateSessionState, ROOT_PATH]);
 
   const closingOnNavigation = useCallback(() => {
@@ -33,21 +34,28 @@ const useCloseSession = (setSessionState, isCurrentUser) => {
     //borrar CE de SS
   }, [navigate, updateSessionState, ROOT_PATH]);
 
-  const closingOnNewLoginDetected = useCallback(() => {
+  const handleCloseFromOtherTab = useCallback(() => {
     navigate(ROOT_PATH);
     setSessionState({
       currentUser: null,
       expiredSessionMessage: "Su sesión ha sido cerrada desde otra pestaña.",
     });
+    setGlobalData({
+      session: null,
+      session_previous: null,
+    });
     //borrar CE de SS
-    //guardar datos en archivo
-  }, [navigate, setSessionState, ROOT_PATH]);
+  }, [navigate, setSessionState, ROOT_PATH, setGlobalData]);
 
   const manualClosing = () => {
     navigate(ROOT_PATH);
     setSessionState({
       currentUser: null,
       expiredSessionMessage: "",
+    });
+    setGlobalData({
+      session: null,
+      session_previous: null,
     });
     deleteSessionCookie();
     clean_loggedUser_data();
@@ -57,7 +65,7 @@ const useCloseSession = (setSessionState, isCurrentUser) => {
   return {
     closingOnInterval,
     closingOnNavigation,
-    closingOnNewLoginDetected,
+    handleCloseFromOtherTab,
     manualClosing,
   };
 };
