@@ -1,20 +1,31 @@
 import PropTypes from "prop-types";
-//import { useMediaQuery } from "@mui/material";
-import useTriggerOnScroll from "hooks/useTriggerOnScroll";
 import useSessionOptions from "hooks/useSessionOptions";
 import { Box, Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { NavBarContainer } from "components/navBar/Styles";
 import DesktopBar from "components/navBar/DesktopBar";
-//import MobileBar from "components/navBar/MobileBar";
-import RenderIf from "components/RenderIf";
 import WarningPopUp from "components/WarningPopUp";
 import InfoPopUp from "components/InfoPopUp";
 
-const NavBar = ({ navigationOptions, handleManualClosing }) => {
-  const { scrolling } = useTriggerOnScroll();
-  /*const match_max_850 = useMediaQuery((theme) =>
-    theme.breakpoints.down("screen_max_850")
-  );*/
+const SecretaryContainer = styled(Box)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+  width: "100%",
+  display: "flex",
+  justifyContent: "end",
+}));
+
+const SecreatryLabel = styled(Typography)(({ theme }) => ({
+  marginBottom: "0px",
+  padding: theme.spacing(1),
+  backgroundColor: theme.palette.secondary.medium,
+  borderRadius: theme.spacing(1),
+  "&.MuiTypography-root": {
+    fontSize: "1rem",
+    lineHeight: "1",
+  },
+}));
+
+const NavBar = ({ navigationOptions, handleManualClosing, currentUser }) => {
   const {
     handleClick,
     handleSave,
@@ -37,7 +48,7 @@ const NavBar = ({ navigationOptions, handleManualClosing }) => {
         onCancel={handleLogoutWithoutSaving}
         title={"Existen datos que puede guardar."}
         message={
-          "Existen datos de sumarios, inspecciones de calabozo o conteo de detenidos. ¿Desea que estos datos se guarden mediante archivo?"
+          "Existen datos de actuaciones, inspecciones de calabozo o conteo de detenidos. ¿Desea que estos datos se guarden mediante archivo?"
         }
       />
       <InfoPopUp
@@ -45,11 +56,11 @@ const NavBar = ({ navigationOptions, handleManualClosing }) => {
         setOpen={setOpenInfo}
         title={"No existen datos para guardar."}
         message={
-          "No existen datos de sumarios, inspecciones de calabozo o conteo de detenidos."
+          "No existen datos de actuaciones, inspecciones de calabozo o conteo de detenidos."
         }
       />
-      <NavBarContainer role="navigation" scrolling={scrolling}>
-        <RenderIf condition={/*!match_max_850*/ true}>
+      <NavBarContainer role='navigation'>
+        <Box className='flex_max_1200'>
           <DesktopBar
             navigationOptions={navigationOptions}
             handleClick={handleClick}
@@ -57,11 +68,15 @@ const NavBar = ({ navigationOptions, handleManualClosing }) => {
             handleLogout={handleLogout}
             openMenu={openMenu}
           />
-        </RenderIf>
-        <Box sx={{ width: "100%", height: "80px" }}></Box>
-        {/* <RenderIf condition={match_max_850}>
-          <MobileBar navigationOptions={navigationOptions} />
-      </RenderIf>*/}
+
+          <SecretaryContainer>
+            <SecreatryLabel>
+              {currentUser
+                ? `Secreatario/a: ${currentUser.adj} ${currentUser.val}`
+                : "Cargando"}
+            </SecreatryLabel>
+          </SecretaryContainer>
+        </Box>
       </NavBarContainer>
     </>
   );

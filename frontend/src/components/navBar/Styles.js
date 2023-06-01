@@ -127,11 +127,9 @@ const NavItemContainer = styled(ListItem)({
   width: "initial",
 });
 
-const NavBarContainer = styled("nav", {
-  shouldForwardProp: (prop) => prop !== "scrolling",
-})(({ theme, scrolling }) => ({
-  display: "flex",
-  flexWrap: "wrap", //"nowrap",
+const NavBarContainer = styled("nav")(({ theme }) => ({
+  //display: "flex",
+  // flexWrap: "wrap", //"nowrap",
   position: "fixed",
   top: "0",
   left: 0,
@@ -139,22 +137,24 @@ const NavBarContainer = styled("nav", {
   width: "100%",
   minWidth: "850px", //"360px",
   minHeight: "25px",
-  padding: `${theme.spacing(2)} ${theme.spacing(20)}`,
+  padding: `${theme.spacing(2)} ${theme.spacing(2)}`,
   paddingTop: theme.spacing(2),
-  justifyContent: "space-between",
-  alignItems: "center",
-  transition: "background 0.5s ease",
-  background: /*scrolling ?*/ theme.palette.ternary.main /*: "unset"*/,
+  // justifyContent: "space-between",
+  background: theme.palette.ternary.main,
 
   [theme.breakpoints.down("lg")]: {
     padding: `${theme.spacing(2)} ${theme.spacing(4)}`,
   },
 
-  /*[theme.breakpoints.down("screen_max_850")]: {
-    background: theme.palette.ternary.main,
-    top: "unset",
-    bottom: 0,
-  },*/
+  "& .flex_max_1200": {
+    display: "flex",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    maxWidth: "1200px",
+    width: "100%",
+    marginLeft: "auto",
+    marginRight: "auto",
+  },
 }));
 
 const StyledLink = styled(Link)(getNavItem);
