@@ -2,6 +2,8 @@ import { useState, useMemo, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import useCheckSession from "hooks/useCheckSession";
 import useCloseSession from "hooks/useCloseSession";
+import useGlobalData from "hooks/useGlobalData";
+import useFileManager from "hooks/useFileManager";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { theme } from "theme/theme";
 import MainContainer from "components/MainContainer";
@@ -10,7 +12,7 @@ import PageContainer from "components/PageContainer";
 import ScrollToTop from "components/ScrollToTop";
 import Login from "pages/Login";
 import SelectSession from "pages/SelectSession";
-import Home from "pages/Home";
+import Summaries from "pages/Summaries";
 import Home2 from "pages/Home2";
 
 const ROOT_PATH = "/";
@@ -22,25 +24,37 @@ const AppOs = () => {
     expiredSessionMessage: "",
   });
 
+  const { globalData, setGlobalData } = useGlobalData({
+    currentUser_id: sessionState.currentUser && sessionState.currentUser.id,
+  });
+
   const {
     closingOnInterval,
     closingOnNavigation,
-    closingOnNewLoginDetected,
+    handleCloseFromOtherTab,
     manualClosing,
-  } = useCloseSession(setSessionState, sessionState.currentUser ? true : false);
+  } = useCloseSession(
+    setSessionState,
+    setGlobalData,
+    sessionState.currentUser ? true : false
+  );
 
   const { isUserLogged } = useCheckSession({
     closingOnInterval,
     closingOnNavigation,
-    closingOnNewLoginDetected,
+    handleCloseFromOtherTab,
     setSessionState,
     isCurrentUser_null: sessionState.currentUser ? false : true,
-    //    currentUser_id: sessionState.currentUser && sessionState.currentUser.id,
+  });
+
+  const { filesPicker } = useFileManager({
+    currentUser_id: sessionState.currentUser && sessionState.currentUser.id,
   });
 
   const { pathname } = useLocation();
 
   console.log("Estado de sesión:", sessionState);
+  console.log("Estado de data global:", globalData);
 
   const navigationOptions = useMemo(() => {
     return [
@@ -58,9 +72,20 @@ const AppOs = () => {
         element: <SelectSession currentUser={sessionState.currentUser} />,
       },
       {
-        to: "/summaries",
-        label: "Sumarios",
-        element: <Home currentUser={sessionState.currentUser} />,
+        to: "/actuaciones",
+        label: "Actuaciones",
+        element: (
+          <Summaries
+            currentUser={sessionState.currentUser}
+            sessionData={globalData.session && globalData.session.summaries}
+            session_previousData={
+              globalData.session_previous &&
+              globalData.session_previous.summaries
+            }
+            setGlobalData={setGlobalData}
+            filesPicker={filesPicker}
+          />
+        ),
       },
       {
         to: "/home2",
@@ -72,6 +97,9 @@ const AppOs = () => {
     setSessionState,
     sessionState.expiredSessionMessage,
     sessionState.currentUser,
+    globalData.session,
+    globalData.session_previous,
+    setGlobalData,
   ]);
 
   const navBarOptions = useMemo(() => {
@@ -117,6 +145,7 @@ const AppOs = () => {
               pathname === SESSION_TYPE
             }
             handleManualClosing={manualClosing}
+            currentUser={sessionState.currentUser}
           >
             <PageRender
               routesOptions={routesOptions}

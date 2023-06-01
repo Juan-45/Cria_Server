@@ -35,7 +35,7 @@ const Text = styled(Typography)(({ theme }) => ({
   marginBottom: theme.spacing(2),
 }));
 
-const HOME_PATH = "/summaries";
+const HOME_PATH = "/actuaciones";
 
 const SelectSession = ({ currentUser }) => {
   const navigate = useNavigate();
@@ -59,7 +59,7 @@ const SelectSession = ({ currentUser }) => {
         <StyledPaper className='bottomSpace'>
           <Title variant='h2'>Nueva sesión.</Title>
           <Text>
-            No necesita recuperar los datos de sumarios o inspecciones de
+            No necesita recuperar los datos de actuaciones o inspecciones de
             calabozos y conteos de detenidos de la sesión previa, comenzará
             desde cero y los datos previos se borraran de la aplicación.
           </Text>

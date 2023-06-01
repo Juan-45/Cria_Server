@@ -15,7 +15,7 @@ const useLogin = (setSessionState, ps_data) => {
   const requestPostCurrentUser = useAxios("post");
   const navigate = useNavigate();
 
-  const HOME_PATH = "/summaries";
+  const HOME_PATH = "/actuaciones";
   const SESSION_TYPE = "/sessionType";
   const CYCLE_DURATION = 0.0166666666666667; //=== 1 min //30 hours
 
