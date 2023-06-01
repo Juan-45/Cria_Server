@@ -41,14 +41,6 @@ const removeItem = (key) => localStorage.removeItem(key);
 
 const clearLocalStorage = () => localStorage.clear();
 
-//--------Load data from localStorage
-const load_data = (key) => {
-  const data = loadItem(key);
-  if (data) {
-    return data;
-  } else return null;
-};
-
 //--------Get localStorage keys
 
 const getCurrentSessionTimestamp_key = (user_id) =>
@@ -58,7 +50,24 @@ const getCurrentSession_key = (user_id) => `session_${user_id}`;
 
 const getPreviousSession_Key = (user_id) => `session_${user_id}_previous`;
 
+//
 const getCurrentUserSessionID_key = (user_id) => `session_${user_id}_ID`;
+//
+
+//--------Load data from localStorage
+const load_data = (key) => {
+  const data = loadItem(key);
+  if (data) {
+    return data;
+  } else return null;
+};
+
+const load_globalData = (user_id) => {
+  return {
+    session: load_data(getCurrentSession_key(user_id)),
+    session_previous: load_data(getPreviousSession_Key(user_id)),
+  };
+};
 
 //--------Save data to localStorage
 
@@ -95,8 +104,15 @@ const recycleDataSession = (user_id) => {
   const currentTimestamp = Date.now();
   //Load most recent session data
   const previousSessionData = load_data(currentSession_key);
+  //Get timestamp from previous session
+  const previousSessionTimestamp = load_data(
+    getCurrentSessionTimestamp_key(user_id)
+  );
   //Save it as it is, previousSessionData
-  saveItem(getPreviousSession_Key(user_id), previousSessionData);
+  saveItem(getPreviousSession_Key(user_id), {
+    ...previousSessionData,
+    creationTimestamp: previousSessionTimestamp,
+  });
   //Remove the old data from currentSession_key for new work
   removeItem(currentSession_key);
   //Reset currentUserSessionID
@@ -115,6 +131,7 @@ export {
   save_currentSession_timestamp,
   save_loggedUser_data,
   load_data,
+  load_globalData,
   clean_loggedUser_data,
   clean_currentSession,
   recycleDataSession,
@@ -123,4 +140,5 @@ export {
   getPreviousSession_Key,
   getCurrentUserSessionID_key,
   getLocalStorageSize,
+  removeItem,
 };
