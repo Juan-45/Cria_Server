@@ -3,14 +3,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { load_data } from "helpers/localStorage";
 
 const ROOT_PATH = "/";
-const HOME_PATH = "/summaries";
+const HOME_PATH = "/actuaciones";
 const COOKIE_NAME = "user_id";
-const INTERVAL_COOKIE_VERIFICATION = 3600000;
+const INTERVAL_COOKIE_VERIFICATION = 3600000; //3600000;
 
 const useCheckSession = ({
   closingOnInterval,
   closingOnNavigation,
-  closingOnNewLoginDetected,
+  handleCloseFromOtherTab,
   setSessionState,
   isCurrentUser_null,
 }) => {
@@ -77,7 +77,7 @@ const useCheckSession = ({
         event.newValue === null &&
         !isCurrentUser_null
       ) {
-        closingOnNewLoginDetected();
+        handleCloseFromOtherTab();
       }
     };
 
@@ -86,7 +86,7 @@ const useCheckSession = ({
     return () => {
       window.removeEventListener("storage", handleStorageChange);
     };
-  }, [isCurrentUser_null, closingOnNewLoginDetected]);
+  }, [isCurrentUser_null, handleCloseFromOtherTab]);
 
   //useEffect to add interval for automatic closing
   useEffect(() => {
