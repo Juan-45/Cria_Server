@@ -47,7 +47,14 @@ const AppOs = () => {
     isCurrentUser_null: sessionState.currentUser ? false : true,
   });
 
-  const { filesPicker } = useFileManager({
+  const {
+    filesPicker,
+    setServiceDirectory,
+    setBackupDirectory,
+    manageServiceSubFolders,
+    backupHandle,
+    serviceHandle,
+  } = useFileManager({
     currentUser_id: sessionState.currentUser && sessionState.currentUser.id,
   });
 
@@ -84,6 +91,9 @@ const AppOs = () => {
             }
             setGlobalData={setGlobalData}
             filesPicker={filesPicker}
+            setServiceDirectory={setServiceDirectory}
+            setBackupDirectory={setBackupDirectory}
+            manageServiceSubFolders={manageServiceSubFolders}
           />
         ),
       },
@@ -100,6 +110,12 @@ const AppOs = () => {
     globalData.session,
     globalData.session_previous,
     setGlobalData,
+    backupHandle,
+    serviceHandle,
+    filesPicker,
+    setServiceDirectory,
+    setBackupDirectory,
+    manageServiceSubFolders,
   ]);
 
   const navBarOptions = useMemo(() => {

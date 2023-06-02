@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import {
   saveItem,
   removeItem,
-  getCurrentSessionTimestamp_key,
+  // getCurrentSessionTimestamp_key,
   getCurrentSession_key,
-  getCurrentUserSessionID_key,
-  getPreviousSession_Key,
+  // getCurrentUserSessionID_key,
+  //getPreviousSession_Key,
   getLocalStorageSize,
-  load_globalData,
+  // load_globalData,
 } from "helpers/localStorage";
 
 const Summaries = ({
@@ -16,6 +16,9 @@ const Summaries = ({
   session_previousData,
   setGlobalData,
   filesPicker,
+  setServiceDirectory,
+  setBackupDirectory,
+  manageServiceSubFolders,
 }) => {
   const [session_summaries, setSession_summaries] = useState(sessionData);
   const [session_previous_summaries, setSession_previous_summaries] =
@@ -113,7 +116,7 @@ const Summaries = ({
       message: "",
     });
     const files = await filesPicker({
-      folder_id: "base_templates_directory",
+      files_folder_reference: "base_templates_directory",
       setWarningData,
     });
     console.log(files);
@@ -150,6 +153,31 @@ const Summaries = ({
       console.error(error);
     }
   };
+
+  const selectServiceFolder = async () => {
+    const serviceHandle = await setServiceDirectory();
+    const files_subFolderHandle = await manageServiceSubFolders({
+      serviceHandle: serviceHandle,
+      filesSubFolder_name: "Hecho de prueba",
+    });
+    return files_subFolderHandle;
+  };
+
+  const selectBackupFolder = async () => {
+    const backupHandle = await setBackupDirectory();
+    return backupHandle;
+  };
+
+  /**
+   * 
+
+
+  setServiceDirectory,
+  setBackupDirectory,
+  manageServiceSubFolders,
+
+
+   */
 
   //crear funcion que cambie estado local session_summaries
   // cambia id de sumario puntual, id de sumarios
@@ -218,6 +246,10 @@ const Summaries = ({
       <button onClick={onClickOpenFolderBase2}>
         Abrir directory picker base 2
       </button>
+      <button onClick={selectServiceFolder}>
+        Seleccionar carpeta servicio, y sub-capturar carpetas o crearlas
+      </button>
+      <button onClick={selectBackupFolder}>Seleccionar carpeta backup</button>
     </div>
   );
 };
