@@ -6,7 +6,7 @@
   "scripts": {
     "new": "npm install && npm run build-dev",
     "reset": "npm run clean && npm run new",
-    "build": "rimraf dist && webpack",
+    "build": "rimraf dist && eslint . && webpack",
     "build-babel": "npm run build-babel-server && npm run build-babel-client",
     "build-babel-server": "babel src/server --out-dir ./dist",
     "build-babel-client": "babel src/client --copy-files --out-dir ./dist/public",
@@ -27,6 +27,10 @@
     "babel-loader": "^9.1.0",
     "connect-livereload": "^0.6.1",
     "css-loader": "^6.7.2",
+    "eslint": "^8.41.0",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "source-map-loader": "^4.0.1",
     "style-loader": "^3.3.1",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.1.1"

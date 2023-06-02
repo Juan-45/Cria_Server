@@ -38,15 +38,21 @@ module.exports = {
     clean: true,
   },
   watch: true,
-  devtool: false,
+  devtool: "source-map",
   module: {
     rules: [
       {
         test: /\.(js|jsx)$/,
         exclude: /(node_modules)/,
-        use: {
-          loader: "babel-loader",
-        },
+        enforce: "pre",
+        use: [
+          {
+            loader: "babel-loader",
+          },
+          {
+            loader: "source-map-loader",
+          },
+        ],
       },
       {
         test: /\.css$/,
