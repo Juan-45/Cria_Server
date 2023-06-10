@@ -8,13 +8,13 @@ const getLocalStorageSize = () => {
     const itemSize = new Blob([value]).size / 1000;
     totalSize += itemSize;
   }
-  console.log(`Total LS Size (compressed): ${totalSize} Kb`);
+  console.log("Total LS Size (Kb):", totalSize);
 };
 
 const getLocalStorageItemSize = (key) => {
   const item = localStorage.getItem(key);
   const itemSize = new Blob([item]).size / 1000;
-  console.log(`Item ${key} compressed size: ${itemSize} Kb`);
+  console.log(`Item ${key} size: ${itemSize} Kb`);
 };
 
 //--------LocalStorage helper functions
@@ -86,6 +86,14 @@ const save_loggedUser_data = (loggedUser_data) => {
   saveItem(key_loggedUser_data, loggedUser_data);
 };
 
+const save_session = (user_id, session) => {
+  saveItem(getCurrentSession_key(user_id), session);
+};
+
+const save_previousSession = (user_id, previous_session) => {
+  saveItem(getPreviousSession_Key(user_id), previous_session);
+};
+
 //--------Clean localStorage for currentUser
 const clean_currentSession = (user_id) => {
   removeItem(getCurrentSessionTimestamp_key(user_id));
@@ -130,6 +138,8 @@ export {
   save_ps_data,
   save_currentSession_timestamp,
   save_loggedUser_data,
+  save_session,
+  save_previousSession,
   load_data,
   load_globalData,
   clean_loggedUser_data,
