@@ -12,7 +12,7 @@ const FixedContainer = styled(Box)(({ theme }) => ({
   position: "fixed",
   top: 0,
   left: 0,
-  zIndex: 100,
+  zIndex: 1201,
   background: theme.palette.background.transparent.black.main,
 }));
 
