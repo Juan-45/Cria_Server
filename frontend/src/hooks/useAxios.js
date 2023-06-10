@@ -17,17 +17,18 @@ axios.defaults.responseType = "json";
 const useAxios = (method) => {
   const axiosController = useMemo(() => new AbortController(), []);
 
-  const axiosInstance = useCallback(
-    axios.create({
-      method: method,
-      signal: axiosController.signal,
-    }),
-    [axiosController]
+  const axiosInstance = useMemo(
+    () =>
+      axios.create({
+        method: method,
+        signal: axiosController.signal,
+      }),
+    [axiosController, method]
   );
 
   const axiosRequest = useCallback(
-    (settings) =>
-      axiosInstance(settings)
+    async (settings) =>
+      await axiosInstance(settings)
         .then(function (response) {
           //M console.log(`Response--- ${settings.url}`, response);
           //return response
@@ -83,7 +84,7 @@ const useAxios = (method) => {
   useEffect(() => {
     //Callback call in case the component unmounts
     return () => {
-      // axiosController.abort();
+      axiosController.abort();
       console.log("Axios request--- Aborted");
     };
   }, [axiosController]);
