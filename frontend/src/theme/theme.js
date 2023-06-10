@@ -188,7 +188,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           "&:hover": {
-            background: palette.background.transparent.white.main,
+            background: "unset",
           },
         },
       },
@@ -203,22 +203,20 @@ const theme = createTheme({
       defaultProps: {
         disablePortal: true,
       },
-      styleOverrides: {
-        root: {
-          width: "100%",
-          marginBottom: "16px",
-          "& .MuiAutocomplete-popupIndicator": {
-            color: palette.gray900,
-          },
-          "& .MuiAutocomplete-clearIndicator": {
-            color: palette.gray900,
-          },
-        },
+    },
+    MuiSelect: {
+      defaultProps: {
+        variant: "standard",
       },
     },
     MuiAccordion: {
       defaultProps: {
         square: true,
+      },
+    },
+    MuiPaper: {
+      defaultProps: {
+        elevation: 3,
       },
     },
   },
