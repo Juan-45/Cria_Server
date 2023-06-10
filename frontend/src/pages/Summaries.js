@@ -1,5 +1,17 @@
-import { useState, useEffect } from "react";
-import {
+import useSummaries from "hooks/useSummaries";
+import useGet_ps_data from "hooks/useGet_ps_data";
+import { Typography } from "@mui/material";
+import { GenericContainer, Divider } from "components/CommonStyles";
+import TableBasic from "components/Table";
+import SessionSelectorTab from "components/SessionSelectorTab";
+import WarningPopUp from "components/WarningPopUp";
+import InfoPopUp from "components/InfoPopUp";
+import ErrorPopUp from "components/ErrorPopUp";
+import InitialDataForm from "pages/summaries/InitialDataForm";
+import RenderIf from "components/RenderIf";
+import Loading from "components/Loading";
+import Involveds from "./summaries/Involveds";
+/*import {
   saveItem,
   removeItem,
   // getCurrentSessionTimestamp_key,
@@ -8,249 +20,280 @@ import {
   //getPreviousSession_Key,
   getLocalStorageSize,
   // load_globalData,
-} from "helpers/localStorage";
+} from "helpers/localStorage";*/
+
+const HEAD = [
+  { label: "Actuaciones por:", key: "summary_by" },
+  { label: "Ipp", key: "ipp" },
+  { label: "Víctima/s", key: "victims" },
+  { label: "Denunciante/s", key: "complainants" },
+  { label: "Causante/s", key: "causants" },
+  { label: "Imputado/s", key: "accuseds" },
+];
 
 const Summaries = ({
   currentUser,
-  sessionData,
-  session_previousData,
+  sessionSummaries,
+  session_previousSummaries,
   setGlobalData,
   filesPicker,
-  setServiceDirectory,
-  setBackupDirectory,
-  manageServiceSubFolders,
+  manage_service_filesSubFolder,
+  manage_backup_subFolder,
+  updatePreviousSessionSummaries,
+  updateSessionSummaries,
 }) => {
-  const [session_summaries, setSession_summaries] = useState(sessionData);
-  const [session_previous_summaries, setSession_previous_summaries] =
-    useState(session_previousData);
-  const [warningData, setWarningData] = useState({
+  const {
+    session_summaries,
+    session_previous_summaries,
+    isSession,
+    summarySelected,
+    deleteWarningData,
+    unsavedWarningData_sessionType,
+    unsavedWarningData_selectSummary,
+    edition_warningData,
+    infoData,
+    unsavedFormDataConditions,
+    setDeleteWarningData,
+    setUnsavedWarningData_sessionType,
+    setUnsavedWarningData_selectSummary,
+    setEdition_warningData,
+    setInfoData,
+    setSession_summaries,
+    setSession_previous_summaries,
+    setUnsavedFormDataConditions,
+    setSummarySelected,
+    selectSummary,
+    deleteSummary,
+    openDeleteWarning,
+    selectSessionType,
+    ignoreSessionType_warning,
+    ignoreSelectSummary_warning,
+    manageSummarySubmission,
+  } = useSummaries({
+    sessionSummaries,
+    session_previousSummaries,
+    setGlobalData,
+    updatePreviousSessionSummaries,
+    updateSessionSummaries,
+  });
+  const { errorData: request_ps_data_error, ps_data } = useGet_ps_data();
+
+  const isSummarySelected = summarySelected !== null;
+
+  console.log("ESTADOS Summaries:", {
+    session_summaries,
+    session_previous_summaries,
+    isSession,
+    summarySelected,
+    deleteWarningData,
+    unsavedWarningData_sessionType,
+    unsavedWarningData_selectSummary,
+    infoData,
+    unsavedFormDataConditions,
+    ps_data,
+    request_ps_data_error,
+    edition_warningData,
+  });
+
+  /*const [warningData, setWarningData] = useState({
     warning: false,
     message: "",
   });
-  console.log("props", sessionData, session_previousData);
-  //crear estado id para session
-  //crea estado de id para session_previous
-  console.log("session_summaries", session_summaries);
-  console.log("warningData", warningData);
-  const onClickRemove = () => {
-    removeItem(getCurrentSession_key(currentUser.id));
-  };
-
-  const onClickChange = () => {
-    setSession_summaries({
-      id: "id_summaries_2",
-      list: [
-        { summary1: "sumario 1", id: "id_summary_1" },
-        { summary2: "sumario 2", id: "id_summary_2" },
-      ],
-    });
-    setGlobalData((prevState) => ({
-      ...prevState,
-      session: {
-        ...prevState.session,
-        summaries: {
-          id: "id_summaries_2",
-          list: [
-            { summary1: "sumario 1", id: "id_summary_1" },
-            { summary2: "sumario 2", id: "id_summary_2" },
-          ],
-        },
-      },
-    }));
-    saveItem(getCurrentSession_key(currentUser.id), {
-      summaries: {
-        id: "id_summaries_2",
-        list: [
-          { summary1: "sumario 1", id: "id_summary_1" },
-          { summary2: "sumario 2", id: "id_summary_2" },
-        ],
-      },
-    });
-  };
-
-  const onClick = () => {
-    setSession_summaries({
-      id: "id_summaries_1",
-      list: [{ summary1: "sumario 1", id: "id_summary_1" }],
-    });
-    setGlobalData((prevState) => ({
-      ...prevState,
-      session: {
-        ...prevState.session,
-        summaries: {
-          id: "id_summaries_1",
-          list: [{ summary1: "sumario 1", id: "id_summary_1" }],
-        },
-      },
-    }));
-    saveItem(getCurrentSession_key(currentUser.id), {
-      summaries: {
-        id: "id_summaries_1",
-        list: [{ summary1: "sumario 1", id: "id_summary_1" }],
-      },
-    });
-
-    getLocalStorageSize();
-  };
-
-  //PROCESO DE GUARDADO DE ARCHIVOS YA MODIFICADOS POR APP
-  //Luego de cargarse los archivos para armado de plantillas, y luego de su modificación disparar showDirectoryPicker()
-  //la ventana "directory picker" se abrirá en "documents", tendra id específico al usuario actual para referenciar el directorio padre del usuer actual
-  //desde ese directorio, el usuario deberá seleccionar el directorio "Servicio"
-  // siempre y cuando no se haga "refresh" en la pestaña o esta no se cierre, se trabajará con el mismo "FileSystemDirectoryHandle" previamente obtenido
-  //A partir de este punto la aplicación manipulará el "FileSystemDirectoryHandle":
-  // Proceso automático:
-  //- Verificar si E carpeta con fecha actual, si no E crearla, si E entrar
-  //- Verificar si E carpeta para el hecho actual, si no E crearla-entrar-guardar archivos, si E entrar y guardar archivos
-
-  //PROCESO DE GUARDADO DE ARCHIVOS DE SESION
-  // Pedir carpeta de destino para guardar archivo si no E "FileSystemDirectoryHandle" asociado a "Backup" para el user actual,
-  // siendo esta "Backup" dentro del _directorio padre_ del usuario actual
-
-  //PROCESO DE CARGA DE ARCHIVOS BACKUP
-  // Solicitar mediante showOpenFilePicker archivo backup específico, configurando este método con startIn e Id
-
-  const onClickOpenFolderBaseMultiple = async () => {
-    setWarningData({
-      warning: false,
-      message: "",
-    });
-    const files = await filesPicker({
-      files_folder_reference: "base_templates_directory",
-      setWarningData,
-    });
-    console.log(files);
-    /* try {
-      //El directorio padre debe ser plano, y los subdirectorios deben tener un solo nivel con pocos archivos
-      const filePicker = await window.showOpenFilePicker({
-        id: "base_templates_directory",
-        startIn: "documents",
-        multiple: true,
-      });
-      // if (directoryHandle.name !== "MiDirectorio") {
-       // throw new Error("Directorio no válido");
-      //}
-
-      console.log("Archivo obtenido exitosamente desde base.", filePicker);
-    } catch (error) {
-      console.error(error);
-    }*/
-  };
-
-  const onClickOpenFolderBase2 = async () => {
-    try {
-      //El directorio padre debe ser plano, y los subdirectorios deben tener un solo nivel con pocos archivos
-      const filePicker = await window.showOpenFilePicker({
-        id: "base_templates_directory_2",
-        startIn: "documents",
-      });
-      if (filePicker.name !== "archivo.txt") {
-        console.log(`El archivo ${filePicker.name} no es válido`);
-      }
-
-      console.log("Archivo obtenido exitosamente desde base 2.", filePicker);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   const selectServiceFolder = async () => {
-    const serviceHandle = await setServiceDirectory();
-    const files_subFolderHandle = await manageServiceSubFolders({
-      serviceHandle: serviceHandle,
-      filesSubFolder_name: "Hecho de prueba",
+    const files_subFolderHandle = await manage_service_filesSubFolder({
+      filesSubFolder_name: "Hecho de prueba 2",
     });
     return files_subFolderHandle;
   };
 
   const selectBackupFolder = async () => {
-    const backupHandle = await setBackupDirectory();
+    const backupHandle = await manage_backup_subFolder();
     return backupHandle;
-  };
+  };*/
 
-  /**
-   * 
-
-
-  setServiceDirectory,
-  setBackupDirectory,
-  manageServiceSubFolders,
-
-
-   */
-
-  //crear funcion que cambie estado local session_summaries
-  // cambia id de sumario puntual, id de sumarios
-
-  //crear funcion que cambie estado local session_previous_summaries
-  // cambia id de sumario puntual, id de sumarios
-
-  //Update local states on parent state changes
-  useEffect(() => {
-    if (sessionData) {
-      if (session_summaries) {
-        if (sessionData.id !== session_summaries.id) {
-          setSession_summaries(sessionData);
-        }
-      } else setSession_summaries(sessionData);
-    }
-    if (session_previousData) {
-      if (session_previous_summaries) {
-        if (session_previousData.id !== session_previous_summaries.id) {
-          setSession_previous_summaries(session_previousData);
-        }
-      } else setSession_previous_summaries(session_previousData);
-    }
-  }, [
-    sessionData,
-    session_previousData,
-    session_summaries,
-    session_previous_summaries,
-  ]);
-
-  //Update LS after local states changes
-  /*useEffect(() => {
-    const current_globalData = load_globalData(currentUser.id);
-
-    if (session_summaries) {
-      if (current_globalData.session.summaries.id !== session_summaries.id) {
-        saveItem(getCurrentSession_key(currentUser.id), {
-          ...current_globalData.session,
-          summaries: session_summaries,
-          //id: nuevo id de estado para session
-        });
-      }
-    }
-    if (session_previous_summaries) {
-      if (
-        current_globalData.session_previous.summaries.id !==
-        session_previous_summaries.id
-      ) {
-        saveItem(getPreviousSession_Key(currentUser.id), {
-          ...current_globalData.session_previous,
-          summaries: session_previous_summaries,
-          //id: nuevo id de estado para session_previous
-        });
-      }
-    }
-  }, [session_summaries, session_previous_summaries, currentUser.id]);*/
   return (
-    <div>
-      <h1>HOME</h1>
-      <button onClick={onClick}>Agregar un sumario en LS</button>
-      <button onClick={onClickChange}>Agregar otro sumario en LS</button>
-      <button onClick={onClickRemove}>Borrar datos session_id de LS</button>
-      <button onClick={onClickOpenFolderBaseMultiple}>
-        Abrir directory picker base múltiple
-      </button>
-      <button onClick={onClickOpenFolderBase2}>
-        Abrir directory picker base 2
-      </button>
-      <button onClick={selectServiceFolder}>
-        Seleccionar carpeta servicio, y sub-capturar carpetas o crearlas
-      </button>
-      <button onClick={selectBackupFolder}>Seleccionar carpeta backup</button>
-    </div>
+    <GenericContainer
+      className='column max1200 sidePaddingOnLg'
+      sx={{ paddingBottom: "300px" }}
+    >
+      <ErrorPopUp
+        errorCondition={request_ps_data_error.error}
+        errorData={request_ps_data_error}
+        isRequestType={true}
+        shouldResetSite={request_ps_data_error.shouldResetSite}
+      />
+      <WarningPopUp
+        open={deleteWarningData.warning}
+        setOpen={(val) =>
+          setDeleteWarningData((prevState) => ({ ...prevState, warning: val }))
+        }
+        onAccept={deleteSummary}
+        onCancel={() =>
+          setDeleteWarningData((prevState) => ({
+            ...prevState,
+            warning: false,
+          }))
+        }
+        title={deleteWarningData.title}
+        message={deleteWarningData.message}
+      />
+      <WarningPopUp
+        open={unsavedWarningData_sessionType.warning}
+        setOpen={(val) =>
+          setUnsavedWarningData_sessionType((prevState) => ({
+            ...prevState,
+            warning: val,
+          }))
+        }
+        onAccept={ignoreSessionType_warning}
+        onCancel={() =>
+          setUnsavedWarningData_sessionType((prevState) => ({
+            ...prevState,
+            warning: false,
+          }))
+        }
+        title={unsavedWarningData_sessionType.title}
+        message={unsavedWarningData_sessionType.message}
+      />
+      <WarningPopUp
+        open={unsavedWarningData_selectSummary.warning}
+        setOpen={(val) =>
+          setUnsavedWarningData_selectSummary((prevState) => ({
+            ...prevState,
+            warning: val,
+          }))
+        }
+        onAccept={ignoreSelectSummary_warning}
+        onCancel={() =>
+          setUnsavedWarningData_selectSummary((prevState) => ({
+            ...prevState,
+            warning: false,
+          }))
+        }
+        title={unsavedWarningData_selectSummary.title}
+        message={unsavedWarningData_selectSummary.message}
+      />
+      <WarningPopUp
+        withOptions={false}
+        open={edition_warningData.warning}
+        setOpen={(val) =>
+          setEdition_warningData((prevState) => ({
+            ...prevState,
+            warning: val,
+          }))
+        }
+        title={edition_warningData.title}
+        message={edition_warningData.message}
+      />
+      <InfoPopUp
+        open={infoData.info}
+        setOpen={(val) =>
+          setInfoData((prevState) => ({ ...prevState, info: val }))
+        }
+        title={infoData.title}
+        message={infoData.message}
+      />
+      <RenderIf condition={session_previous_summaries}>
+        <SessionSelectorTab
+          isSession={isSession}
+          selectSessionType={selectSessionType}
+        />
+      </RenderIf>
+      <Typography variant='h1' gutterBottom>
+        Listado de actuaciones
+      </Typography>
+      <TableBasic
+        head={HEAD}
+        data={
+          isSession
+            ? session_summaries
+              ? session_summaries.list
+              : []
+            : session_previous_summaries
+            ? session_previous_summaries.list
+            : []
+        }
+        selectSummary={selectSummary}
+        openDeleteWarning={openDeleteWarning}
+      />
+      <Divider />
+      <Typography variant='h2' gutterBottom>
+        Datos iniciales
+      </Typography>
+      <RenderIf condition={!ps_data.ps_data_ready}>
+        <Loading />
+      </RenderIf>
+      <RenderIf condition={ps_data.ps_data_ready}>
+        <InitialDataForm
+          ps_data={ps_data}
+          setUnsavedFormDataConditions={setUnsavedFormDataConditions}
+          summarySelected={summarySelected}
+          unsavedInitialData={unsavedFormDataConditions.initialData}
+          setSummarySelected={setSummarySelected}
+          manageSummarySubmission={manageSummarySubmission}
+        />
+      </RenderIf>
+      <Divider />
+      <RenderIf condition={/*isSummarySelected*/ true}>
+        <Involveds
+          //involveds={summarySelected ? summarySelected.involveds : null}
+          involveds={[
+            {
+              id: "1",
+              type: "isVictim",
+              gender: "masculino",
+              fullName: "Juan Perez",
+              nationality: "Argentina",
+              education: "sí",
+              civilStatus: "soltero",
+              occupation: "empleado",
+              age: "30",
+              birthDate: "1992-05-10",
+              dni: "12345678",
+              phone: "123456789",
+              address: "Calle Principal 123",
+              city: "Pergamino",
+              province: "Buenos Aires",
+            },
+            {
+              id: "2",
+              type: "isComplainant",
+              gender: "femenino",
+              fullName: "Maria Gonzalez",
+              nationality: "Argentina",
+              education: "no",
+              civilStatus: "casada",
+              occupation: "ama de casa",
+              age: "35",
+              birthDate: "1987-09-20",
+              dni: "98765432",
+              phone: "987654321",
+              address: "Avenida Principal 456",
+              city: "Pergamino",
+              province: "Buenos Aires",
+            },
+            {
+              id: "3",
+              type: "isAccused",
+              gender: "masculino",
+              fullName: "Carlos Sanchez",
+              nationality: "Argentina",
+              education: "sí",
+              civilStatus: "divorciado",
+              occupation: "jubilado/pensionado",
+              age: "60",
+              birthDate: "1963-03-15",
+              dni: "54321678",
+              phone: "543216789",
+              address: "Plaza Principal 789",
+              city: "Pergamino",
+              province: "Buenos Aires",
+            },
+          ]}
+        />
+      </RenderIf>
+    </GenericContainer>
   );
 };
 

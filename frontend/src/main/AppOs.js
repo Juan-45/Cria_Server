@@ -24,7 +24,12 @@ const AppOs = () => {
     expiredSessionMessage: "",
   });
 
-  const { globalData, setGlobalData } = useGlobalData({
+  const {
+    globalData,
+    setGlobalData,
+    updateSessionSummaries,
+    updatePreviousSessionSummaries,
+  } = useGlobalData({
     currentUser_id: sessionState.currentUser && sessionState.currentUser.id,
   });
 
@@ -49,19 +54,20 @@ const AppOs = () => {
 
   const {
     filesPicker,
-    setServiceDirectory,
-    setBackupDirectory,
-    manageServiceSubFolders,
-    backupHandle,
-    serviceHandle,
+    manage_service_filesSubFolder,
+    manage_backup_subFolder,
   } = useFileManager({
     currentUser_id: sessionState.currentUser && sessionState.currentUser.id,
   });
 
   const { pathname } = useLocation();
 
-  console.log("Estado de sesión:", sessionState);
-  console.log("Estado de data global:", globalData);
+  console.log("ESTADOS desde root:", {
+    sessionState,
+    globalData,
+    isUserLogged,
+    pathname,
+  });
 
   const navigationOptions = useMemo(() => {
     return [
@@ -84,16 +90,19 @@ const AppOs = () => {
         element: (
           <Summaries
             currentUser={sessionState.currentUser}
-            sessionData={globalData.session && globalData.session.summaries}
-            session_previousData={
+            sessionSummaries={
+              globalData.session && globalData.session.summaries
+            }
+            session_previousSummaries={
               globalData.session_previous &&
               globalData.session_previous.summaries
             }
             setGlobalData={setGlobalData}
+            updateSessionSummaries={updateSessionSummaries}
+            updatePreviousSessionSummaries={updatePreviousSessionSummaries}
             filesPicker={filesPicker}
-            setServiceDirectory={setServiceDirectory}
-            setBackupDirectory={setBackupDirectory}
-            manageServiceSubFolders={manageServiceSubFolders}
+            manage_service_filesSubFolder={manage_service_filesSubFolder}
+            manage_backup_subFolder={manage_backup_subFolder}
           />
         ),
       },
@@ -110,12 +119,11 @@ const AppOs = () => {
     globalData.session,
     globalData.session_previous,
     setGlobalData,
-    backupHandle,
-    serviceHandle,
     filesPicker,
-    setServiceDirectory,
-    setBackupDirectory,
-    manageServiceSubFolders,
+    manage_service_filesSubFolder,
+    manage_backup_subFolder,
+    updatePreviousSessionSummaries,
+    updateSessionSummaries,
   ]);
 
   const navBarOptions = useMemo(() => {
