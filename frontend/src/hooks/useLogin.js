@@ -80,8 +80,7 @@ const useLogin = (setSessionState, ps_data) => {
     }
   };
 
-  const selectUser = (event, newValue) =>
-    setSecretaryId(newValue ? newValue.id : "");
+  const selectUser = (newValue) => setSecretaryId(newValue ? newValue.id : "");
 
   return {
     selectUser,
