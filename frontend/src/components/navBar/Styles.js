@@ -128,18 +128,15 @@ const NavItemContainer = styled(ListItem)({
 });
 
 const NavBarContainer = styled("nav")(({ theme }) => ({
-  //display: "flex",
-  // flexWrap: "wrap", //"nowrap",
   position: "fixed",
   top: "0",
   left: 0,
   zIndex: "1200",
   width: "100%",
-  minWidth: "850px", //"360px",
+  minWidth: "850px",
   minHeight: "25px",
   padding: `${theme.spacing(2)} ${theme.spacing(2)}`,
   paddingTop: theme.spacing(2),
-  // justifyContent: "space-between",
   background: theme.palette.ternary.main,
 
   [theme.breakpoints.down("lg")]: {
