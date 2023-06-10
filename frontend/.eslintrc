@@ -14,7 +14,7 @@
     // Otras reglas personalizadas aquí
     "react/prop-types": "off",
     "react/react-in-jsx-scope": "off",
-    "no-undef": "off",
+    "no-undef": "warn",
     "no-unused-vars": "off",
     "no-constant-condition": "off",
     "react-hooks/exhaustive-deps": "error"
