@@ -1,10 +1,4 @@
-import PropTypes from "prop-types";
-import {
-  Box,
-  Typography,
-  TextField as TextFieldOriginal,
-  Button as ButtonOriginal,
-} from "@mui/material";
+import { Box, Typography, Button as ButtonOriginal } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 import mergician from "mergician";
@@ -33,20 +27,24 @@ const MediumContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-const LargeContainer = styled(Box)(({ theme }) => ({
-  maxWidth: "1200px",
+const GenericContainer = styled(Box)(({ theme }) => ({
   width: "100%",
-  marginLeft: "auto",
-  marginRight: "auto",
-  "&.sidePadding": {
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(2),
+  "&.max1200": {
+    maxWidth: "1200px",
   },
-  "&.bottomSpace": {
-    marginBottom: theme.spacing(8),
+  "&.max900": {
+    maxWidth: "900px",
   },
-  "&.bottomSpaceSmall": {
-    marginBottom: theme.spacing(2),
+  "&.column": {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    "&.sidePaddingOnLg": {
+      [theme.breakpoints.down("lg")]: {
+        paddingRight: theme.spacing(2),
+        paddingLeft: theme.spacing(2),
+      },
+    },
   },
 }));
 
@@ -85,58 +83,40 @@ const StyledLink = styled(Link)({
   textDecoration: "unset",
 });
 
-const LargeContainerFlex = styled(LargeContainer)({
-  display: "flex",
-  alignItems: "flex-start",
-  flexWrap: "wrap",
-  "&.center": {
-    justifyContent: "center",
-  },
-});
-
-const ResponsiveItemsContainer = styled(Box)(({ theme }) => ({
+const ResponsiveContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   flexWrap: "wrap",
-  [theme.breakpoints.up("sm")]: {
-    width: "calc(100% + 16px)",
-    marginRight: "-16px",
-  },
-  "&.mobile": {
-    [theme.breakpoints.down("sm")]: {
-      width: "calc(100% + 8px)",
-      marginRight: "-8px",
+  width: "100%",
+  paddingLeft: theme.spacing(2),
+  "&.paddingInBetween": {
+    paddingLeft: "0px",
+    "&>div": {
+      paddingRight: theme.spacing(1),
+      paddingLeft: theme.spacing(1),
+      "&:first-child": {
+        paddingLeft: "0px",
+      },
+      "&:last-child": {
+        paddingRight: "0px",
+      },
     },
-  },
-  "&.bottomSpace": {
-    marginBottom: theme.spacing(2),
   },
 }));
 
-const ResponsiveContainer = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "columns",
-})(({ theme, columns }) => ({
-  minHeight: "300px",
+const ResponsiveItem = styled(Box)(({ theme }) => ({
+  // minHeight: "170px",
   display: "flex",
   flexDirection: "column",
   justifyContent: "flex-start",
-  marginBottom: theme.spacing(3),
-  width: "100%",
-  [theme.breakpoints.up("sm")]: {
-    width: "50%",
-    paddingRight: theme.spacing(2),
+  width: "50%",
+  paddingRight: theme.spacing(2),
+  "&.max-3-columns": {
+    width: "33.33%",
   },
-  [theme.breakpoints.up("tablet_min_900")]: {
-    width: columns === 4 ? "25%" : "33.33%",
+  "&.max-4-columns": {
+    width: "25%",
   },
 }));
-
-ResponsiveContainer.propTypes = {
-  columns: PropTypes.oneOf([3, 4]),
-};
-
-ResponsiveContainer.defaultProps = {
-  columns: 4,
-};
 
 const getCommonStyles = ({ theme }) => ({
   marginBottom: theme.spacing(1.5),
@@ -154,7 +134,7 @@ const StyledItemTitle = styled(Typography)(({ theme }) =>
 );
 
 const ItemTitle = ({ children, ...props }) => (
-  <StyledItemTitle variant="h2" {...props}>
+  <StyledItemTitle variant='h2' {...props}>
     {children}
   </StyledItemTitle>
 );
@@ -206,19 +186,25 @@ const ResponsiveInputContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-const TextField = styled(TextFieldOriginal)(({ theme }) => ({
+/*const TextField = styled(TextFieldOriginal)(({ theme }) => ({
   color: theme.palette.text.primary,
+  height: "unset",
+  marginBottom: theme.spacing(2),
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: theme.palette.grey[900],
+  },
   "& .MuiInputBase-root": {
-    height: "40px",
+    "&::before": {
+      zIndex: 1,
+    },
+    "&::after": {
+      content: "unset",
+    },
     "&.MuiInputBase-multiline": {
       height: "initial",
     },
-    background: theme.palette.common.white,
     "&.MuiInput-root:hover:before": {
-      borderBottom: "1px solid rgba(0, 0, 0, 0.42)",
-    },
-    "&::after": {
-      borderBottom: `3px solid ${theme.palette.secondary.main}`,
+      borderBottom: `2px solid ${theme.palette.grey[900]}`,
     },
     "& .MuiAutocomplete-endAdornment": {
       right: "8px",
@@ -229,8 +215,9 @@ const TextField = styled(TextFieldOriginal)(({ theme }) => ({
     },
   },
   "& .MuiInputBase-input, && .MuiAutocomplete-input.MuiInputBase-input": {
-    padding: "7px 0px 8px",
-    paddingLeft: theme.spacing(1),
+    padding: `${theme.spacing(0.5)} 0px ${theme.spacing(0.5)} ${theme.spacing(
+      1
+    )}`,
   },
   "& .MuiFormLabel-root": {
     color: "inherit",
@@ -246,7 +233,7 @@ const TextField = styled(TextFieldOriginal)(({ theme }) => ({
       color: "inherit",
     },
   },
-}));
+}));*/
 
 const Button = styled(ButtonOriginal)(({ theme }) => ({
   minWidth: "100px",
@@ -308,23 +295,42 @@ const AfterSquareContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
+const Divider = styled("div")(({ theme }) => ({
+  width: "100%",
+  height: "1px",
+  background: theme.palette.grey[100],
+  position: "relative",
+  boxShadow: theme.shadows[2],
+  marginTop: theme.spacing(3),
+  marginBottom: theme.spacing(5),
+  "&::after": {
+    content: "''",
+    position: "absolute",
+    top: "-1px",
+    width: "100%",
+    height: "1px",
+    background: theme.palette.grey[400],
+    zIndex: "1",
+  },
+}));
+
 export {
   FlexRowCenter,
   MediumContainer,
-  LargeContainer,
+  GenericContainer,
   FullscreenColumn,
   HighlightRed,
   HighlightBlue,
   StyledLink,
-  LargeContainerFlex,
-  ResponsiveItemsContainer,
+  //LargeContainerFlex,
+  ResponsiveItem,
   ResponsiveContainer,
   ItemTitle,
   Title,
   ItemDescription,
   ResponsiveInputContainer,
-  TextField,
   Button,
   AfterSquareContainer,
+  Divider,
   TRANSITION_TIME,
 };
