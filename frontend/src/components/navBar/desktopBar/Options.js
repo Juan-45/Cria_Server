@@ -1,5 +1,6 @@
+import { StyledItem, StyledList } from "components/MenuStyles";
 import { styled } from "@mui/material/styles";
-import { IconButton, List, ListItem, Typography } from "@mui/material";
+import { IconButton } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import SaveIcon from "@mui/icons-material/Save";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -29,56 +30,30 @@ const OptionsButton = styled(IconButton, {
   "& .options_list": {
     color: "initial",
     fontSize: "0.875rem",
+    top: "50px",
+    right: "0",
+    minWidth: "190px",
   },
-}));
-
-const StyledItem = styled(ListItem)(({ theme }) => ({
-  padding: theme.spacing(1),
-  borderBottom: `1px solid ${theme.palette.divider}`,
-  textTransform: "uppercase",
-  display: "flex",
-  justifyContent: "space-between",
-  "&::last-child": {
-    borderBottom: "none",
-  },
-  "&:hover": {
-    background: theme.palette.divider,
-  },
-  "& .item_icon": {
-    color: theme.palette.text.secondary,
-  },
-}));
-
-const StyledList = styled(List, {
-  shouldForwardProp: (props) => props != "open",
-})(({ theme, open }) => ({
-  display: open ? "initial" : "none",
-  background: theme.palette.primary.main,
-  position: "absolute",
-  top: "50px",
-  right: "0",
-  minWidth: "190px",
-  boxShadow: theme.shadows[2],
 }));
 
 const Options = ({ openMenu, handleClick, handleSave, handleLogout }) => {
   return (
     <OptionsButton
-      aria-label="account_options"
-      size="large"
+      aria-label='account_options'
+      size='large'
       disableRipple={true}
       onClick={handleClick}
       open={openMenu}
     >
-      <SettingsIcon className="options_icon" fontSize="inherit" />
-      <StyledList open={openMenu} className="options_list">
+      <SettingsIcon className='options_icon' fontSize='inherit' />
+      <StyledList open={openMenu} className='options_list'>
         <StyledItem onClick={handleSave}>
           Guardar datos
-          <SaveIcon className="item_icon" />
+          <SaveIcon className='item_icon' />
         </StyledItem>
         <StyledItem onClick={handleLogout}>
           Cerrar sesión
-          <LogoutIcon className="item_icon" />
+          <LogoutIcon className='item_icon' />
         </StyledItem>
       </StyledList>
     </OptionsButton>
