@@ -49,7 +49,7 @@ const useTriggerOnScroll = () => {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [scrolling, trigger]);
 
   return { scrolling, targetEl, trigger };
 };
