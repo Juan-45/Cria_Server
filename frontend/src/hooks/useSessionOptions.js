@@ -1,14 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import useMemu from "hooks/useMemu";
 
 const useSessionOptions = (manualClosing) => {
-  const [openMenu, setOpenMenu] = useState(false);
+  const { handleClick, openMenu } = useMemu();
   const [openInfo, setOpenInfo] = useState(false);
   const [openWarning, setOpenWarning] = useState(false);
-
-  const handleClick = (event) => {
-    event.stopPropagation();
-    setOpenMenu(!openMenu);
-  };
 
   const handleSave = () => {
     if (/*hay datos de sesión */ false) {
@@ -16,7 +12,6 @@ const useSessionOptions = (manualClosing) => {
     } else {
       setOpenInfo(true);
     }
-    setOpenMenu(false);
   };
 
   const handleLogout = () => {
@@ -25,7 +20,6 @@ const useSessionOptions = (manualClosing) => {
     } else {
       manualClosing();
     }
-    setOpenMenu(false);
   };
 
   const handleLogoutWithoutSaving = () => {
@@ -41,14 +35,6 @@ const useSessionOptions = (manualClosing) => {
     setOpenWarning(false);
   };
 
-  useEffect(() => {
-    const closeMenu = () => setOpenMenu(false);
-    document.addEventListener("click", closeMenu);
-
-    return () => {
-      document.removeEventListener("click", closeMenu);
-    };
-  }, []);
   return {
     handleClick,
     handleSave,
