@@ -67,6 +67,7 @@ const useCheckSession = ({
     closingOnNavigation,
     setIsRootLocation,
     isCurrentUser_null,
+    setSessionState,
   ]);
 
   //useEffect to add listener to detect loggedUser_data's changes in localStorage

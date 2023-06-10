@@ -18,7 +18,7 @@ const useCloseSession = (setSessionState, setGlobalData, isCurrentUser) => {
         session: null,
         session_previous: null,
       });
-  }, [setSessionState, setGlobalData, isCurrentUser, setGlobalData]);
+  }, [setSessionState, setGlobalData, isCurrentUser]);
 
   const closingOnInterval = useCallback(() => {
     navigate(ROOT_PATH);
