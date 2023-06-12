@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import {
   FormContainer,
   FieldsContainer,
@@ -10,6 +10,8 @@ import Input from "components/Input";
 import RenderIf from "components/RenderIf";
 import Combobox from "components/Combobox";
 import { ResponsiveItem } from "components/CommonStyles";
+import { getInputErrorException } from "helpers/error";
+import { verifyPropsReferences } from "helpers/development_debuggin";
 
 const SUMMARY_TYPES = [
   { val: "isSummary", label: "Actuaciones por hecho" },
@@ -29,16 +31,16 @@ const DEFAULT_FORM_DATA = {
   instructor: "",
   instructor_rank: "",
   instructor_id: "",
-  instructor_obj: { val: "", id: "default" },
+  instructor_obj: { val: "", id: "" },
   //type isSummary
   prosecution: "",
   prosecutor: "",
   prosecution_id: "",
-  prosecution_obj: { val: "", id: "default" },
+  prosecution_obj: { val: "", id: "" },
   court: "",
   judge: "",
   court_id: "",
-  court_obj: { val: "", id: "default" },
+  court_obj: { val: "", id: "" },
   //type isWhereabouts or isCapture
   judicialBody: "",
   isn: "",
@@ -64,6 +66,18 @@ const InitialDataForm = ({
   manageSummarySubmission,
   setSummarySelected,
 }) => {
+  verifyPropsReferences(
+    {
+      ps_data,
+      setUnsavedFormDataConditions,
+      summarySelected,
+      unsavedInitialData,
+      manageSummarySubmission,
+      setSummarySelected,
+    },
+    "InitialDataForm - props"
+  );
+
   const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
   const [formMessage, setFormMessage] = useState(DEFAULT_FORM_MESSAGE);
   const [requiredError, setRequiredError] = useState(DEFAULT_REQUIRED_ERROR);
@@ -111,7 +125,7 @@ const InitialDataForm = ({
 
       [...required_keys, ...summary_required_keys].forEach((required_key) => {
         const requiredValue = summaryInitialData[required_key];
-        if (requiredValue === "" || requiredValue === "default") {
+        if (requiredValue === "") {
           requiredError = true;
         }
       });
@@ -140,7 +154,7 @@ const InitialDataForm = ({
       [...required_keys, ...nonSummary_required_keys].forEach(
         (required_key) => {
           const requiredValue = nonSummaryInitialData[required_key];
-          if (requiredValue === "" || requiredValue === "default") {
+          if (requiredValue === "") {
             requiredError = true;
           }
         }
@@ -159,6 +173,16 @@ const InitialDataForm = ({
     }));
   };
 
+  //Reset initialData unsaved condition
+  const unsetUnsavedDataHandler = useCallback(
+    () =>
+      setUnsavedFormDataConditions((prevState) => ({
+        ...prevState,
+        initialData: false,
+      })),
+    [setUnsavedFormDataConditions]
+  );
+
   const setUnsavedDataHandler = (val) => {
     if (val) {
       setUnsavedFormDataConditions((prevState) => ({
@@ -171,23 +195,10 @@ const InitialDataForm = ({
         message: "En este formulario hay datos sin guardar.",
       });
     } else {
-      setUnsavedFormDataConditions((prevState) => ({
-        ...prevState,
-        initialData: false,
-      }));
+      unsetUnsavedDataHandler();
       closeFormMessage();
     }
   };
-
-  //On successful submission
-  const unsetUnsavedDataHandler = useCallback(
-    () =>
-      setUnsavedFormDataConditions((prevState) => ({
-        ...prevState,
-        initialData: false,
-      })),
-    [setUnsavedFormDataConditions]
-  );
 
   //Submit function only accesible for the user when unsavedInitialData is true thanks to FormSettings
   const submitForm = () => {
@@ -220,6 +231,8 @@ const InitialDataForm = ({
 
   //Individual handlers for each field
   const handleType = (event) => {
+    //To reset requiredError changing the interface
+    setRequiredError(DEFAULT_REQUIRED_ERROR);
     setFormData((prevState) => ({
       ...prevState,
       type: event.target.value,
@@ -249,7 +262,6 @@ const InitialDataForm = ({
       instructor: newValue.val,
       instructor_id: newValue.id,
       instructor_rank: newValue.adj,
-      instructor_obj: newValue.obj,
     }));
   };
 
@@ -260,7 +272,6 @@ const InitialDataForm = ({
       prosecution: newValue.val,
       prosecution_id: newValue.id,
       prosecutor: newValue.adj,
-      prosecution_obj: newValue.obj,
     }));
   };
 
@@ -271,7 +282,6 @@ const InitialDataForm = ({
       court: newValue.val,
       court_id: newValue.id,
       judge: newValue.adj,
-      court_obj: newValue.obj,
     }));
   };
 
@@ -299,6 +309,16 @@ const InitialDataForm = ({
     }));
   };
 
+  const valueIsNotDefault = {
+    cover: formData.cover !== "" && true,
+    instructor: formData.instructor !== "" && true,
+    prosecution: formData.prosecution !== "" && true,
+    court: formData.court !== "" && true,
+    judicialBody: formData.judicialBody !== "" && true,
+    isn: formData.isn !== "" && true,
+    requestDate: formData.requestDate !== "" && true,
+  };
+
   useEffect(() => {
     const getFormDataValuesFrom = (selectedSummary) => {
       const commonValues = {
@@ -310,30 +330,15 @@ const InitialDataForm = ({
         instructor: selectedSummary.instructor,
         instructor_rank: selectedSummary.instructor_rank,
         instructor_id: selectedSummary.instructor_id,
-        instructor_obj: {
-          val: selectedSummary.instructor,
-          id: selectedSummary.instructor_id,
-          adj: selectedSummary.instructor_rank,
-        },
       };
 
       const summaryValues = {
         prosecution: selectedSummary.prosecution,
         prosecutor: selectedSummary.prosecutor,
         prosecution_id: selectedSummary.prosecution_id,
-        prosecution_obj: {
-          val: selectedSummary.prosecution,
-          id: selectedSummary.prosecution_id,
-          adj: selectedSummary.prosecutor,
-        },
         court: selectedSummary.court,
         judge: selectedSummary.judge,
         court_id: selectedSummary.court_id,
-        court_obj: {
-          val: selectedSummary.court,
-          id: selectedSummary.court_id,
-          adj: selectedSummary.judge,
-        },
       };
 
       const nonSummaryValues = {
@@ -373,82 +378,136 @@ const InitialDataForm = ({
     renewSummarySelected,
   ]);
   return (
-    <FormContainer className='column max900'>
+    <FormContainer className="column max900">
       <FieldsContainer>
         <ResponsiveItem>
           <Select
-            label='Tipo de actuación'
+            label="Tipo de actuación"
             value={formData.type}
             onChange={handleType}
             options={SUMMARY_TYPES}
             inputProps={{ disabled: isEdition }}
           />
           <Input
-            label='Carátula'
+            label="Carátula"
             value={formData.cover}
             onChange={handleCover}
             required
-            error={requiredError.error}
-            helperText={requiredError.helperText}
+            error={getInputErrorException(
+              requiredError.error,
+              valueIsNotDefault.cover
+            )}
+            helperText={getInputErrorException(
+              requiredError.helperText,
+              valueIsNotDefault.cover
+            )}
           />
-          <Input label='IPP' value={formData.ipp} onChange={handleIpp} />
+          <Input label="IPP" value={formData.ipp} onChange={handleIpp} />
           <Combobox
-            label='Instructor'
+            label="Instructor"
             options={ps_data.instructors}
             onChange={handleInstructor}
-            value={formData.instructor_obj}
+            value={{
+              val: formData.instructor,
+              id: formData.instructor_id,
+              adj: formData.instructor_rank,
+            }}
             required
-            error={requiredError.error}
-            helperText={requiredError.helperText}
+            error={getInputErrorException(
+              requiredError.error,
+              valueIsNotDefault.instructor
+            )}
+            helperText={getInputErrorException(
+              requiredError.helperText,
+              valueIsNotDefault.instructor
+            )}
           />
         </ResponsiveItem>
         <ResponsiveItem>
           <RenderIf condition={formData.type === "isSummary"}>
             <Combobox
-              label='Fiscalía'
+              label="Fiscalía"
               options={ps_data.prosecutions}
               onChange={handleProsecution}
-              value={formData.prosecution_obj}
+              value={{
+                val: formData.prosecution,
+                id: formData.prosecution_id,
+                adj: formData.prosecutor,
+              }}
               required
-              error={requiredError.error}
-              helperText={requiredError.helperText}
+              error={getInputErrorException(
+                requiredError.error,
+                valueIsNotDefault.prosecution
+              )}
+              helperText={getInputErrorException(
+                requiredError.helperText,
+                valueIsNotDefault.prosecution
+              )}
             />
             <Combobox
-              label='Juzg. Gtias.'
+              label="Juzg. Gtias."
               options={ps_data.courts}
               onChange={handleCourt}
-              value={formData.court_obj}
+              value={{
+                val: formData.court,
+                id: formData.court_id,
+                adj: formData.judge,
+              }}
               required
-              error={requiredError.error}
-              helperText={requiredError.helperText}
+              error={getInputErrorException(
+                requiredError.error,
+                valueIsNotDefault.court
+              )}
+              helperText={getInputErrorException(
+                requiredError.helperText,
+                valueIsNotDefault.court
+              )}
             />
           </RenderIf>
           <RenderIf condition={formData.type !== "isSummary"}>
             <Input
-              label='Órgano judicial interviniente'
+              label="Órgano judicial interviniente"
               value={formData.judicialBody}
               onChange={handleJudicialBody}
               required
-              error={requiredError.error}
-              helperText={requiredError.helperText}
+              error={getInputErrorException(
+                requiredError.error,
+                valueIsNotDefault.judicialBody
+              )}
+              helperText={getInputErrorException(
+                requiredError.helperText,
+                valueIsNotDefault.judicialBody
+              )}
             />
             <Input
-              label='ISN'
+              label="ISN"
               value={formData.isn}
               onChange={handleIsn}
               required
-              error={requiredError.error}
-              helperText={requiredError.helperText}
+              error={getInputErrorException(
+                requiredError.error,
+                valueIsNotDefault.isn
+              )}
+              helperText={getInputErrorException(
+                requiredError.helperText,
+                valueIsNotDefault.isn
+              )}
             />
             <Input
-              label='Fecha de alta'
+              label="Fecha de alta"
               value={formData.requestDate}
               onChange={handleRequestDate}
               required
-              error={requiredError.error}
+              error={getInputErrorException(
+                requiredError.error,
+                valueIsNotDefault.requestDate
+              )}
               helperText={
                 requiredError.helperText
-                  ? requiredError.helperText
+                  ? getInputErrorException(
+                      requiredError.helperText,
+                      valueIsNotDefault.requestDate
+                    )
                   : "Use formato dd/mm/yyyy"
               }
             />
@@ -472,4 +531,4 @@ const InitialDataForm = ({
   );
 };
 
-export default InitialDataForm;
+export default memo(InitialDataForm);

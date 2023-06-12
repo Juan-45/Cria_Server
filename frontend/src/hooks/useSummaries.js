@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { removeItemFrom } from "helpers/dataManagement";
+import { verifyPropsReferences } from "helpers/development_debuggin";
 
 const DEFAULT_unsavedFormDataConditions = {
   initialData: false,
@@ -85,9 +86,20 @@ const useSummaries = ({
         callback();
       }
     },
-    [unsavedFormDataConditions]
+    [
+      unsavedFormDataConditions.initialData,
+      unsavedFormDataConditions.involveds,
+      unsavedFormDataConditions.vehicles,
+    ]
   );
 
+  //TODO: FALTA involvedsSelector, involvedForm,omitir los inputs por ahora
+  //Testing tool
+  /* verifyPropsReferences(
+    { unsavedFormDataConditions },
+    "useSummaries - unsavedFormDataConditions"
+  );*/
+  //
   const changeSessionType = (newValue) => {
     setIsSession(newValue);
     setSummarySelected(null);
@@ -213,75 +225,84 @@ const useSummaries = ({
 
   //InitialDataForm, InvolvedDataForm, VehiclesDataForm callback for submission
   //In case of InvolvesDataForm or VehiclesDataForm, validData is an object with the property involveds or vehicles taken from selectedSummary
-  const manageSummarySubmission = (isEdition, validData) => {
-    const newId = uuidv4();
-    const newVersionId = uuidv4();
+  //isEdition must be always true for involveds and vehicles
+  const manageSummarySubmission = useCallback(
+    (isEdition, validData) => {
+      const newId = uuidv4();
+      const newVersionId = uuidv4();
 
-    const get_updated_list = (list) => {
-      const listWithoutSelectedSummary = removeItemFrom(
-        list,
-        summarySelected.id
-      );
+      const get_updated_list = (list) => {
+        const listWithoutSelectedSummary = removeItemFrom(
+          list,
+          summarySelected.id
+        );
 
-      return [
-        ...listWithoutSelectedSummary,
-        { ...summarySelected, ...validData, version_id: newVersionId },
-      ];
-    };
+        return [
+          ...listWithoutSelectedSummary,
+          { ...summarySelected, ...validData, version_id: newVersionId },
+        ];
+      };
 
-    if (isEdition) {
-      setSummarySelected((prevState) => ({
-        ...prevState,
-        ...validData,
-        version_id: newVersionId,
-      }));
-      if (isSession) {
-        updateSessionSummaries((prevSummaries) => ({
-          id: newId,
-          list: get_updated_list(prevSummaries.list),
+      if (isEdition) {
+        setSummarySelected((prevState) => ({
+          ...prevState,
+          ...validData,
+          version_id: newVersionId,
         }));
+        if (isSession) {
+          updateSessionSummaries((prevSummaries) => ({
+            id: newId,
+            list: get_updated_list(prevSummaries.list),
+          }));
+        } else {
+          updatePreviousSessionSummaries((prevSummaries) => ({
+            id: newId,
+            list: get_updated_list(prevSummaries.list),
+          }));
+        }
       } else {
-        updatePreviousSessionSummaries((prevSummaries) => ({
+        setSummarySelected((prevState) => ({
+          ...prevState,
+          ...validData,
           id: newId,
-          list: get_updated_list(prevSummaries.list),
+          version_id: newVersionId,
         }));
+        if (isSession) {
+          updateSessionSummaries((prevSummaries) => ({
+            id: newId,
+            list: [
+              ...prevSummaries.list,
+              {
+                ...summarySelected,
+                ...validData,
+                id: newId,
+                version_id: newVersionId,
+              },
+            ],
+          }));
+        } else {
+          updatePreviousSessionSummaries((prevSummaries) => ({
+            id: newId,
+            list: [
+              ...prevSummaries.list,
+              {
+                ...summarySelected,
+                ...validData,
+                id: newId,
+                version_id: newVersionId,
+              },
+            ],
+          }));
+        }
       }
-    } else {
-      setSummarySelected((prevState) => ({
-        ...prevState,
-        ...validData,
-        id: newId,
-        version_id: newVersionId,
-      }));
-      if (isSession) {
-        updateSessionSummaries((prevSummaries) => ({
-          id: newId,
-          list: [
-            ...prevSummaries.list,
-            {
-              ...summarySelected,
-              ...validData,
-              id: newId,
-              version_id: newVersionId,
-            },
-          ],
-        }));
-      } else {
-        updatePreviousSessionSummaries((prevSummaries) => ({
-          id: newId,
-          list: [
-            ...prevSummaries.list,
-            {
-              ...summarySelected,
-              ...validData,
-              id: newId,
-              version_id: newVersionId,
-            },
-          ],
-        }));
-      }
-    }
-  };
+    },
+    [
+      isSession,
+      summarySelected,
+      updatePreviousSessionSummaries,
+      updateSessionSummaries,
+    ]
+  );
 
   //In case of unsaved data error solved, clean warningData
   useEffect(() => {

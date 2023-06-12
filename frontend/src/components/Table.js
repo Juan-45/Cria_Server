@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, memo } from "react";
 import {
   Table,
   TableBody,
@@ -8,8 +8,10 @@ import {
   TableRow,
   TablePagination,
   Paper,
+  Box,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import Options from "components/table/Options";
 import { manageDefaultStringForTable } from "helpers/dataManagement";
 
@@ -41,6 +43,9 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
       backgroundColor: theme.palette.grey[200],
     },
   },
+  "&.selected": {
+    backgroundColor: theme.palette.grey[200],
+  },
   borderBottom: `1px solid ${theme.palette.grey[500]}`,
 }));
 
@@ -55,11 +60,33 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
     backgroundColor: theme.palette.secondary.medium,
     whiteSpace: "nowrap",
   },
+  "&:first-of-type": {
+    "& .MuiSvgIcon-root": {
+      display: "none",
+    },
+  },
+  "&.selected": {
+    "& .firstCellContainer": {
+      display: "flex",
+      alignItems: "center",
+    },
+    "&:first-of-type": {
+      "& .MuiSvgIcon-root": {
+        minWidth: "unset",
+        marginRight: theme.spacing(1),
+        display: "inline-flex",
+        fontSize: "1rem",
+        color: theme.palette.secondary.main,
+      },
+    },
+    // },
+  },
 }));
 
 const TableBasic = ({
   head = [],
   data = [],
+  selectedSummaryId,
   selectSummary,
   openDeleteWarning,
 }) => {
@@ -98,7 +125,7 @@ const TableBasic = ({
         <StyledTableCell
           key={header.key}
           align={index !== 0 ? "right" : "left"}
-          className='head'
+          className="head"
         >
           {header.label}
         </StyledTableCell>
@@ -111,13 +138,21 @@ const TableBasic = ({
       const cells = head.map((header, index) => {
         if (index === 0) {
           return (
-            <StyledTableCell key={header.key} component='th' scope='row'>
-              {manageDefaultStringForTable(currentRow[header.key])}
+            <StyledTableCell
+              key={header.key}
+              component="th"
+              scope="row"
+              className={selectedSummaryId === currentRow.id ? "selected" : ""}
+            >
+              <Box className="firstCellContainer">
+                <RadioButtonCheckedIcon />
+                {manageDefaultStringForTable(currentRow[header.key])}
+              </Box>
             </StyledTableCell>
           );
         } else {
           return (
-            <StyledTableCell key={header.key} align='right'>
+            <StyledTableCell key={header.key} align="right">
               {manageDefaultStringForTable(currentRow[header.key])}
             </StyledTableCell>
           );
@@ -125,7 +160,7 @@ const TableBasic = ({
       });
       return [
         ...cells,
-        <StyledTableCell key={"settings"} align='center'>
+        <StyledTableCell key={"settings"} align="center">
           <Options
             handleSelect={() => selectSummary(currentRow.id)}
             handleDelete={() => openDeleteWarning(currentRow.id)}
@@ -133,7 +168,7 @@ const TableBasic = ({
         </StyledTableCell>,
       ];
     },
-    [head, selectSummary, openDeleteWarning]
+    [head, selectSummary, openDeleteWarning, selectedSummaryId]
   );
 
   //If table is used for rows with more than 2 cell, the following key could be get from the first and the second value
@@ -143,8 +178,8 @@ const TableBasic = ({
         <StyledTableRow>
           <StyledTableCell
             colSpan={head.length + 1}
-            align='center'
-            className='noData'
+            align="center"
+            className="noData"
           >
             No hay datos
           </StyledTableCell>
@@ -153,14 +188,25 @@ const TableBasic = ({
     } else {
       const tableRows = data
         .map((row) => (
-          <StyledTableRow key={row[head[0].key] + row.id} className='body'>
+          <StyledTableRow
+            key={row[head[0].key] + row.id}
+            className={`body ${selectedSummaryId === row.id ? "selected" : ""}`}
+          >
             {getRowCells(row)}
           </StyledTableRow>
         ))
         .slice(page * ROWS_PER_PAGE, page * ROWS_PER_PAGE + ROWS_PER_PAGE);
       return tableRows;
     }
-  }, [data, head, getRowCells, page, NO_DATA_CONDITION, ROWS_PER_PAGE]);
+  }, [
+    data,
+    head,
+    getRowCells,
+    page,
+    NO_DATA_CONDITION,
+    ROWS_PER_PAGE,
+    selectedSummaryId,
+  ]);
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
@@ -169,7 +215,7 @@ const TableBasic = ({
   return (
     <StyledPaper square>
       <TableContainer>
-        <Table size='small' aria-label='simple table'>
+        <Table size="small" aria-label="simple table">
           <TableHead>
             <StyledTableRow>{headCells}</StyledTableRow>
           </TableHead>
@@ -189,7 +235,7 @@ const TableBasic = ({
       </TableContainer>
       <TablePagination
         rowsPerPageOptions={[ROWS_PER_PAGE]}
-        component='div'
+        component="div"
         count={data.length}
         rowsPerPage={ROWS_PER_PAGE}
         page={page}
@@ -201,4 +247,4 @@ const TableBasic = ({
   );
 };
 
-export default TableBasic;
+export default memo(TableBasic);

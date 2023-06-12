@@ -95,10 +95,11 @@ const Summaries = ({
     edition_warningData,
   });
 
-  /*const [warningData, setWarningData] = useState({
-    warning: false,
-    message: "",
-  });
+  //TODO: MANEJAR HANDLE PARA CREAR CARPETA INVOLUCRADO (fullName), dentro de carpeta hecho (filesSubFolder_name)
+  //TODO: MANEJAR HANDLE PARA CREAR CARPETA VEHÍCULO (vehicle+brand+model), dentro de carpeta hecho, y
+  // dentro de carpeta involucrado (fullName) si "involucrado asociado" es true
+
+  /*
 
   const selectServiceFolder = async () => {
     const files_subFolderHandle = await manage_service_filesSubFolder({
@@ -114,7 +115,7 @@ const Summaries = ({
 
   return (
     <GenericContainer
-      className='column max1200 sidePaddingOnLg'
+      className="column max1200 sidePaddingOnLg"
       sx={{ paddingBottom: "300px" }}
     >
       <ErrorPopUp
@@ -200,7 +201,7 @@ const Summaries = ({
           selectSessionType={selectSessionType}
         />
       </RenderIf>
-      <Typography variant='h1' gutterBottom>
+      <Typography variant="h1" gutterBottom>
         Listado de actuaciones
       </Typography>
       <TableBasic
@@ -214,11 +215,12 @@ const Summaries = ({
             ? session_previous_summaries.list
             : []
         }
+        selectedSummaryId={summarySelected ? summarySelected.id : null}
         selectSummary={selectSummary}
         openDeleteWarning={openDeleteWarning}
       />
       <Divider />
-      <Typography variant='h2' gutterBottom>
+      <Typography variant="h2" gutterBottom>
         Datos iniciales
       </Typography>
       <RenderIf condition={!ps_data.ps_data_ready}>
@@ -234,11 +236,15 @@ const Summaries = ({
           manageSummarySubmission={manageSummarySubmission}
         />
       </RenderIf>
-      <Divider />
-      <RenderIf condition={/*isSummarySelected*/ true}>
+      <RenderIf condition={isSummarySelected}>
+        <Divider />
         <Involveds
-          //involveds={summarySelected ? summarySelected.involveds : null}
-          involveds={[
+          involveds={summarySelected ? summarySelected.involveds : null}
+          setUnsavedFormDataConditions={setUnsavedFormDataConditions}
+          unsavedInvolvedData={unsavedFormDataConditions.involveds}
+          manageSummarySubmission={manageSummarySubmission}
+          setSummarySelected={setSummarySelected}
+          /*  involveds={[
             {
               id: "1",
               type: "isVictim",
@@ -290,7 +296,7 @@ const Summaries = ({
               city: "Pergamino",
               province: "Buenos Aires",
             },
-          ]}
+          ]}*/
         />
       </RenderIf>
     </GenericContainer>

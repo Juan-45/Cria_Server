@@ -11,6 +11,7 @@ import Select from "components/Select";
 import Input from "components/Input";
 import RenderIf from "components/RenderIf";
 import { removeItemFrom } from "helpers/dataManagement";
+import { getInputErrorException } from "helpers/error";
 
 const INVOLVED_TYPES = [
   { val: "isVictim", label: "Vícitma" },
@@ -76,7 +77,7 @@ const CIVIL_STATUS_FEMALE = [
   },
 ];
 
-const OCUPATION_MALE = [
+const OCCUPATION_MALE = [
   {
     val: "empleado",
     label: "Empleado",
@@ -112,7 +113,7 @@ const OCUPATION_MALE = [
   },
 ];
 
-const OCUPATION_FEMALE = [
+const OCCUPATION_FEMALE = [
   {
     val: "empleada",
     label: "Empleada",
@@ -178,12 +179,20 @@ const DEFAULT_REQUIRED_ERROR = {
   helperText: "",
 };
 
+const setOptionsByGender = (gender, maleOptions, femaleOptions) => {
+  const options = gender === "femenino" ? femaleOptions : maleOptions;
+  return options;
+};
+
+//TODO: prioridad extra alta: optimizar re-render, ocurre que se re-renderiza toda la página al cambiar un campo
+//de este form --Tal vez sea por re-referenciar objetos hardcodeados en el código, o pasados por props--
+//TODO: prioridad alta: manejar selección de involucrado y actualización de formData
+
 const InvolvedForm = ({
   setUnsavedFormDataConditions,
   involveds,
   unsavedInvolvedData,
   manageSummarySubmission,
-  setSummarySelected,
 }) => {
   const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
   const [formMessage, setFormMessage] = useState(DEFAULT_FORM_MESSAGE);
@@ -254,7 +263,7 @@ const InvolvedForm = ({
       [...required_keys, ...isDetaineeFileNecessary_required_keys].forEach(
         (required_key) => {
           const requiredValue = detaineeInvolvedData[required_key];
-          if (requiredValue === "" || requiredValue === "default") {
+          if (requiredValue === "") {
             requiredError = true;
           }
         }
@@ -282,7 +291,7 @@ const InvolvedForm = ({
 
       required_keys.forEach((required_key) => {
         const requiredValue = nonDetaineeInvolvedData[required_key];
-        if (requiredValue === "" || requiredValue === "default") {
+        if (requiredValue === "") {
           requiredError = true;
         }
       });
@@ -343,13 +352,24 @@ const InvolvedForm = ({
 
       if (isEdition) {
         const involvedsWithoutCurrent = removeItemFrom(involveds, formData.id);
-        validData = [...involvedsWithoutCurrent, validFormData];
+        validData = [
+          ...involvedsWithoutCurrent,
+          { ...validFormData, id: formData.id },
+        ];
       } else {
         const newId = uuidv4();
-        validData = [...involveds, { ...validFormData, id: newId }];
+        if (involveds) {
+          validData = [...involveds, { ...validFormData, id: newId }];
+        } else {
+          validData = [{ ...validFormData, id: newId }];
+        }
       }
 
-      manageSummarySubmission(isEdition, { involveds: validData });
+      console.log("DATOS INVOLVED FORM SUBMITTING", {
+        validData,
+        validFormData,
+      });
+      manageSummarySubmission(true, { involveds: validData });
       setFormMessage({
         open: true,
         severity: "success",
@@ -362,170 +382,414 @@ const InvolvedForm = ({
     }
   };
 
+  const renewInvolvedSelected = useCallback(() => {
+    setFormData(DEFAULT_FORM_DATA);
+    setFormMessage(DEFAULT_FORM_MESSAGE);
+    unsetUnsavedDataHandler();
+  }, [unsetUnsavedDataHandler]);
+
+  //Individual handlers for each field
+  const handleType = (event) => {
+    setUnsavedDataHandler(event.target.value);
+    setFormData((prevState) => ({
+      ...prevState,
+      type: event.target.value,
+    }));
+  };
+
+  const handleGender = (event) => {
+    setUnsavedDataHandler(event.target.value);
+    setFormData((prevState) => ({
+      ...prevState,
+      gender: event.target.value,
+      occupation: "",
+      civilStatus: "",
+    }));
+  };
+
+  const handleFullName = (value) => {
+    setUnsavedDataHandler(value);
+    setFormData((prevState) => ({
+      ...prevState,
+      fullName: value,
+    }));
+  };
+
+  const handleNationality = (value) => {
+    setUnsavedDataHandler(value);
+    setFormData((prevState) => ({
+      ...prevState,
+      nationality: value,
+    }));
+  };
+
+  const handleEducation = (event) => {
+    setUnsavedDataHandler(event.target.value);
+    setFormData((prevState) => ({
+      ...prevState,
+      education: event.target.value,
+    }));
+  };
+
+  const handleCivilStatus = (event) => {
+    setUnsavedDataHandler(event.target.value);
+    setFormData((prevState) => ({
+      ...prevState,
+      civilStatus: event.target.value,
+    }));
+  };
+
+  const handleOccupation = (event) => {
+    setUnsavedDataHandler(event.target.value);
+    setFormData((prevState) => ({
+      ...prevState,
+      occupation: event.target.value,
+    }));
+  };
+
+  const handleAge = (value) => {
+    setUnsavedDataHandler(value);
+    setFormData((prevState) => ({
+      ...prevState,
+      age: value,
+    }));
+  };
+
+  const handleBirthDate = (value) => {
+    setUnsavedDataHandler(value);
+    setFormData((prevState) => ({
+      ...prevState,
+      birthDate: value,
+    }));
+  };
+
+  const handleDni = (value) => {
+    setUnsavedDataHandler(value);
+    setFormData((prevState) => ({
+      ...prevState,
+      dni: value,
+    }));
+  };
+
+  const handlePhone = (value) => {
+    setUnsavedDataHandler(value);
+    setFormData((prevState) => ({
+      ...prevState,
+      phone: value,
+    }));
+  };
+
+  const handleAddress = (value) => {
+    setUnsavedDataHandler(value);
+    setFormData((prevState) => ({
+      ...prevState,
+      address: value,
+    }));
+  };
+
+  const handleCity = (value) => {
+    setUnsavedDataHandler(value);
+    setFormData((prevState) => ({
+      ...prevState,
+      city: value,
+    }));
+  };
+
+  const handleProvince = (value) => {
+    setUnsavedDataHandler(value);
+    setFormData((prevState) => ({
+      ...prevState,
+      province: value,
+    }));
+  };
+
+  const valueIsNotDefault = {
+    type: formData.type !== "" && true,
+    gender: formData.gender !== "" && true,
+    fullName: formData.fullName !== "" && true,
+    nationality: formData.nationality !== "" && true,
+    education: formData.education !== "" && true,
+    civilStatus: formData.civilStatus !== "" && true,
+    occupation: formData.occupation !== "" && true,
+    age: formData.age !== "" && true,
+    birthDate: formData.birthDate !== "" && true,
+    dni: formData.dni !== "" && true,
+    phone: formData.phone !== "" && true,
+    address: formData.address !== "" && true,
+    city: formData.city !== "" && true,
+    province: formData.province !== "" && true,
+  };
+
   return (
-    <FormContainer className='column max1200'>
+    <FormContainer className="column max1200">
       <FieldsContainer>
-        <ResponsiveItem className='max-3-columns'>
-          <ResponsiveContainer className='paddingInBetween'>
+        <ResponsiveItem className="max-3-columns">
+          <ResponsiveContainer className="paddingInBetween">
             <ResponsiveItem>
               <Select
-                label='Tipo'
-                // value={formData.type}
-                //onChange={handleType}
+                label="Tipo"
+                value={formData.type}
+                onChange={handleType}
                 options={INVOLVED_TYPES}
-                //  inputProps={{ disabled: isEdition }}
+                inputProps={{ disabled: isEdition }}
                 required
-                //disabled en caso de involucrado seleccionado
+                error={getInputErrorException(
+                  requiredError.error,
+                  valueIsNotDefault.type
+                )}
+                helperText={getInputErrorException(
+                  requiredError.helperText,
+                  valueIsNotDefault.type
+                )}
               />
             </ResponsiveItem>
             <ResponsiveItem>
               <Select
-                label='Género'
-                // value={formData.type}
-                // onChange={handleType}
+                label="Género"
+                value={formData.gender}
+                onChange={handleGender}
                 options={GENDERS}
                 required
+                error={getInputErrorException(
+                  requiredError.error,
+                  valueIsNotDefault.gender
+                )}
+                helperText={getInputErrorException(
+                  requiredError.helperText,
+                  valueIsNotDefault.gender
+                )}
               />
             </ResponsiveItem>
           </ResponsiveContainer>
-
           <Input
-            label='Apellido y nombre'
-            //value={formData.ipp}
-
-            onChange={() => {}}
+            label="Apellido y nombre"
+            value={formData.fullName}
+            onChange={handleFullName}
             required
+            error={getInputErrorException(
+              requiredError.error,
+              valueIsNotDefault.fullName
+            )}
+            helperText={getInputErrorException(
+              requiredError.helperText,
+              valueIsNotDefault.fullName
+            )}
           />
-          <ResponsiveContainer className='paddingInBetween'>
+          <ResponsiveContainer className="paddingInBetween">
             <ResponsiveItem>
               <Input
-                label='Nacionalidad'
-                // value={formData.type}
-                //onChange={handleType}
-                onChange={() => {}}
+                label="Nacionalidad"
+                value={formData.nationality}
+                onChange={handleNationality}
                 required
+                error={getInputErrorException(
+                  requiredError.error,
+                  valueIsNotDefault.nationality
+                )}
+                helperText={getInputErrorException(
+                  requiredError.helperText,
+                  valueIsNotDefault.fullName
+                )}
               />
             </ResponsiveItem>
             <ResponsiveItem>
               <Select
-                label='Instrucción'
-                // value={formData.type}
-                // onChange={handleType}
+                label="Instrucción"
+                value={formData.education}
+                onChange={handleEducation}
                 options={EDUCATED}
                 required
+                error={getInputErrorException(
+                  requiredError.error,
+                  valueIsNotDefault.education
+                )}
+                helperText={getInputErrorException(
+                  requiredError.helperText,
+                  valueIsNotDefault.education
+                )}
               />
             </ResponsiveItem>
           </ResponsiveContainer>
         </ResponsiveItem>
-        <ResponsiveItem className='max-3-columns'>
-          <ResponsiveContainer className='paddingInBetween'>
+        <ResponsiveItem className="max-3-columns">
+          <ResponsiveContainer className="paddingInBetween">
             <ResponsiveItem>
               <Select
-                label='Estado civil'
-                // value={formData.type}
-                // onChange={handleType}
-                options={CIVIL_STATUS_MALE}
+                label="Estado civil"
+                value={formData.civilStatus}
+                onChange={handleCivilStatus}
+                options={setOptionsByGender(
+                  formData.gender,
+                  CIVIL_STATUS_MALE,
+                  CIVIL_STATUS_FEMALE
+                )}
                 required
+                error={getInputErrorException(
+                  requiredError.error,
+                  valueIsNotDefault.civilStatus
+                )}
+                helperText={getInputErrorException(
+                  requiredError.helperText,
+                  valueIsNotDefault.civilStatus
+                )}
               />
             </ResponsiveItem>
             <ResponsiveItem>
               <Select
-                label='Ocupación'
-                // value={formData.type}
-                // onChange={handleType}
-                options={OCUPATION_MALE}
+                label="Ocupación"
+                value={formData.occupation}
+                onChange={handleOccupation}
+                options={setOptionsByGender(
+                  formData.gender,
+                  OCCUPATION_MALE,
+                  OCCUPATION_FEMALE
+                )}
                 required
+                error={getInputErrorException(
+                  requiredError.error,
+                  valueIsNotDefault.occupation
+                )}
+                helperText={getInputErrorException(
+                  requiredError.helperText,
+                  valueIsNotDefault.occupation
+                )}
               />
             </ResponsiveItem>
           </ResponsiveContainer>
-          <ResponsiveContainer className='paddingInBetween'>
+          <ResponsiveContainer className="paddingInBetween">
             <ResponsiveItem>
               <Input
-                label='Edad'
-                // value={formData.type}
-                // onChange={handleType}
-                onChange={() => {}}
+                label="Edad"
+                value={formData.age}
+                onChange={handleAge}
                 required
+                error={getInputErrorException(
+                  requiredError.error,
+                  valueIsNotDefault.age
+                )}
+                helperText={getInputErrorException(
+                  requiredError.helperText,
+                  valueIsNotDefault.age
+                )}
               />
             </ResponsiveItem>
             <ResponsiveItem>
               <Input
-                label='Fecha de nacimiento'
-                // value={formData.type}
-                // onChange={handleType}
+                label="Fecha de nacimiento"
+                value={formData.birthDate}
+                onChange={handleBirthDate}
                 required
-                /* helperText={
-                    requiredError.helperText
-                      ? requiredError.helperText
-                      : "Use formato dd/mm/yyyy"
-                  }*/
-                onChange={() => {}}
+                helperText={
+                  requiredError.helperText
+                    ? getInputErrorException(
+                        requiredError.helperText,
+                        valueIsNotDefault.birthDate
+                      )
+                    : "dd/mm/yyyy"
+                }
+                error={getInputErrorException(
+                  requiredError.error,
+                  valueIsNotDefault.birthDate
+                )}
               />
             </ResponsiveItem>
           </ResponsiveContainer>
-          <ResponsiveContainer className='paddingInBetween'>
+          <ResponsiveContainer className="paddingInBetween">
             <ResponsiveItem>
               <Input
-                label='DNI'
-                // value={formData.type}
-                // onChange={handleType}
+                label="DNI"
+                value={formData.dni}
+                onChange={handleDni}
                 required
-                onChange={() => {}}
+                error={getInputErrorException(
+                  requiredError.error,
+                  valueIsNotDefault.dni
+                )}
+                helperText={getInputErrorException(
+                  requiredError.helperText,
+                  valueIsNotDefault.dni
+                )}
               />
             </ResponsiveItem>
             <ResponsiveItem>
               <Input
-                label='Teléfono'
-                // value={formData.type}
-                // onChange={handleType}
-                onChange={() => {}}
+                label="Teléfono"
+                value={formData.phone}
+                onChange={handlePhone}
                 required
+                error={getInputErrorException(
+                  requiredError.error,
+                  valueIsNotDefault.phone
+                )}
+                helperText={getInputErrorException(
+                  requiredError.helperText,
+                  valueIsNotDefault.phone
+                )}
               />
             </ResponsiveItem>
           </ResponsiveContainer>
         </ResponsiveItem>
-
-        <ResponsiveItem className='max-3-columns'>
+        <ResponsiveItem className="max-3-columns">
           <Input
-            label='Domicilio'
-            //value={formData.ipp}
-
-            onChange={() => {}}
+            label="Domicilio"
+            value={formData.address}
+            onChange={handleAddress}
             required
-            /* helperText={
-                    requiredError.helperText
-                      ? requiredError.helperText
-                      : "Use formato calle nro. 111"
-                  }*/
+            helperText={
+              requiredError.helperText
+                ? getInputErrorException(
+                    requiredError.helperText,
+                    valueIsNotDefault.address
+                  )
+                : "Use formato calle nro. 111"
+            }
+            error={getInputErrorException(
+              requiredError.error,
+              valueIsNotDefault.address
+            )}
           />
           <Input
-            label='Localidad'
-            //value={formData.ipp}
-
-            onChange={() => {}}
+            label="Localidad"
+            value={formData.city}
+            onChange={handleCity}
             required
+            error={getInputErrorException(
+              requiredError.error,
+              valueIsNotDefault.city
+            )}
+            helperText={getInputErrorException(
+              requiredError.helperText,
+              valueIsNotDefault.city
+            )}
           />
           <Input
-            label='Provincia'
-            //value={formData.ipp}
-
-            onChange={() => {}}
+            label="Provincia"
+            value={formData.province}
+            onChange={handleProvince}
             required
+            error={getInputErrorException(
+              requiredError.error,
+              valueIsNotDefault.province
+            )}
+            helperText={getInputErrorException(
+              requiredError.helperText,
+              valueIsNotDefault.province
+            )}
           />
         </ResponsiveItem>
       </FieldsContainer>
       <FormMessage
-      /*  open={formMessage.open}
+        open={formMessage.open}
         onClose={closeFormMessage}
-        severity={formMessage.severity}*/
+        severity={formMessage.severity}
       >
-        {/*formMessage.message*/}
+        {formMessage.message}
       </FormMessage>
       <FormSettings
-      /* unsavedData={unsavedInitialData}
+        unsavedData={unsavedInvolvedData}
         isEdition={isEdition}
         onSubmit={submitForm}
-        onRenew={renewSummarySelected}*/
+        onRenew={renewInvolvedSelected}
       />
     </FormContainer>
   );

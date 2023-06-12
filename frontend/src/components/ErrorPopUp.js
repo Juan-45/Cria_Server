@@ -66,6 +66,7 @@ ErrorPopUp.defaultProps = {
 
 ErrorPopUp.proptypes = {
   error: proptypes.bool.isRequired,
+  errorCondition: proptypes.bool.isRequired,
   isRequestType: proptypes.bool.isRequired,
   shouldResetSite: proptypes.bool.isRequired,
   errorData: proptypes.shape({

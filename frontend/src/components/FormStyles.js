@@ -4,7 +4,6 @@ import { styled } from "@mui/material/styles";
 import {
   GenericContainer,
   ResponsiveContainer,
-  ResponsiveItem,
   Button,
 } from "components/CommonStyles";
 import RenderIf from "components/RenderIf";
@@ -49,9 +48,9 @@ const FormMessage = ({ severity, open, onClose, children }) => {
         severity={severity}
         action={
           <IconButton
-            aria-label='close'
-            color='inherit'
-            size='small'
+            aria-label="close"
+            color="inherit"
+            size="small"
             onClick={onClose}
           >
             <CloseIcon />

@@ -93,7 +93,7 @@ const ResponsiveContainer = styled(Box)(({ theme }) => ({
     "&>div": {
       paddingRight: theme.spacing(1),
       paddingLeft: theme.spacing(1),
-      "&:first-child": {
+      "&:first-of-type": {
         paddingLeft: "0px",
       },
       "&:last-child": {
@@ -134,7 +134,7 @@ const StyledItemTitle = styled(Typography)(({ theme }) =>
 );
 
 const ItemTitle = ({ children, ...props }) => (
-  <StyledItemTitle variant='h2' {...props}>
+  <StyledItemTitle variant="h2" {...props}>
     {children}
   </StyledItemTitle>
 );

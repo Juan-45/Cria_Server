@@ -46,26 +46,21 @@ const Combobox = ({
   options,
   ...props
 }) => {
-  const [oldValue, setOldValue] = useState({ val: "", id: "default" });
-
   const getComboBoxValue = (value) => {
     if (value) {
       return {
         val: value.val,
         id: value.id,
         adj: value.adj,
-        obj: value,
       };
     } else {
       return {
         val: "",
-        id: "default",
+        id: "",
         adj: "",
-        obj: { val: "", id: "default" },
       };
     }
   };
-
   const handleChange = (event, newValue) => {
     const transformedValue = getComboBoxValue(newValue);
     onChange(transformedValue);
@@ -80,7 +75,7 @@ const Combobox = ({
       //  autoSelect={true}
       openOnFocus={true}
       renderOption={(props, option) => {
-        if (option.id !== "default") {
+        if (option.id !== "") {
           return (
             <li {...props} key={option.id}>
               {option.val}
@@ -88,7 +83,7 @@ const Combobox = ({
           );
         }
       }}
-      options={[...options, { val: "", id: "default" }]}
+      options={[...options, { val: "", id: "" }]}
       {...props}
       renderInput={(params) => {
         const inputProps = params.inputProps;
