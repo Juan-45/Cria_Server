@@ -33,11 +33,12 @@ import uuid
 import subprocess
 
 import boto3
+import os
 from botocore.exceptions import ClientError
 from botocore.config import Config
 
 
-COOKIE_MAX_AGE = 3600  # 3600
+COOKIE_MAX_AGE = 3600
 COOKIE_NAME = "user_id"
 REQUEST_TIMEOUT = 20
 MAX_ATTEMPS = 5
@@ -54,12 +55,10 @@ aws_client = boto3.client(
     "dynamodb",
     config=aws_boto3_settings,
     # tokens
-    aws_access_key_id="key",
-    aws_secret_access_key="key",
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
     #
 )
-
-
 app = Flask(__name__)
 
 # to-do: Configurar la clave secreta de la sesión para producción (necesaria para la firma de cookies)
@@ -80,18 +79,18 @@ limiter.init_app(app)
 
 
 # Disable browser caching so changes in each step are always shown
-@app.after_request
-def set_response_headers(response):
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Pragma"] = "no-cache"
-    response.headers["Expires"] = "0"
-    return response
+# @app.after_request
+# def set_response_headers(response):
+#    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+#    response.headers["Pragma"] = "no-cache"
+#    response.headers["Expires"] = "0"
+#    return response
 
 
 # ONLY FOR LOCAL SERVER
-@app.route("/static/js/<path:path>")
-def send_js(path):
-    return send_from_directory("frontend/dist/public/js", path)
+# @app.route("/static/js/<path:path>")
+# def send_js(path):
+#    return send_from_directory("frontend/dist/public/js", path)
 
 
 id = str(uuid.uuid4())
@@ -159,13 +158,13 @@ def get_ps_data_id():
 @app.route("/", methods=["POST", "GET"])
 def appOs():
     # Uncomment when deploy to App Engine
-    # assertion = user()
-    # if assertion is None:
-    #    message = (
-    #        "La autenticación ha fallado. No se proporcionó una afirmación IAP válida."
-    #    )
-    #    code = "Afirmación IAP inválida"
-    #    return render_template("500.html", message=message, code=code), 500
+    assertion = user()
+    if assertion is None:
+        message = (
+            "La autenticación ha fallado. No se proporcionó una afirmación IAP válida."
+        )
+        code = "Afirmación IAP inválida"
+        return render_template("500.html", message=message, code=code), 500
     if request.method == "POST":
         # record the user
         currentUserId = request.get_json().get("userId")
@@ -200,7 +199,7 @@ def show_policy():
 
 
 # Allowed Client Side Routing paths
-allowed_paths = ["sessionType", "summaries", "home2"]
+allowed_paths = ["sessionType", "actuaciones"]
 
 
 @app.route("/", defaults={"path": ""})
