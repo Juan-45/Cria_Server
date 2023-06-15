@@ -221,7 +221,7 @@ def handle_request_error(error):
     return page, 429
 
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
     # This is used when running locally, only to verify it does not have
     # significant errors. It cannot demonstrate restricting access using
     # Identity-Aware Proxy when run locally, only when deployed.
@@ -229,4 +229,4 @@ if __name__ == "__main__":
     # When deploying to Google App Engine, a webserver process such as
     # Gunicorn will serve the app. This can be configured by adding an
     # `entrypoint` to app.yaml.
-    app.run(host="127.0.0.1", port=8080, debug=True)
+    #app.run(host="127.0.0.1", port=8080, debug=True)
