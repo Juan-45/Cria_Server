@@ -5,7 +5,7 @@ import { load_data } from "helpers/localStorage";
 const ROOT_PATH = "/";
 const HOME_PATH = "/actuaciones";
 const COOKIE_NAME = "user_id";
-const INTERVAL_COOKIE_VERIFICATION = 3600000; //3600000;
+const INTERVAL_COOKIE_VERIFICATION = 900000; //900000; //= 15 min//3600000;
 
 const useCheckSession = ({
   closingOnInterval,

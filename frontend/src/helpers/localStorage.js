@@ -95,7 +95,7 @@ const save_previousSession = (user_id, previous_session) => {
 };
 
 //--------Clean localStorage for currentUser
-const clean_currentSession = (user_id) => {
+const clean_currentUser_data = (user_id) => {
   removeItem(getCurrentSessionTimestamp_key(user_id));
 
   removeItem(getCurrentSession_key(user_id));
@@ -110,21 +110,21 @@ const clean_currentSession = (user_id) => {
 const recycleDataSession = (user_id) => {
   const currentSession_key = getCurrentSession_key(user_id);
   const currentTimestamp = Date.now();
-  //Load most recent session data
-  const previousSessionData = load_data(currentSession_key);
+  //Load most recent session data, in this context is > 30 hs
+  const oldSessionData = load_data(currentSession_key);
   //Get timestamp from previous session
-  const previousSessionTimestamp = load_data(
+  const oldSessionTimestamp = load_data(
     getCurrentSessionTimestamp_key(user_id)
   );
-  //Save it as it is, previousSessionData
+  //Save it as previous_session, oldSessionData
   saveItem(getPreviousSession_Key(user_id), {
-    ...previousSessionData,
-    creationTimestamp: previousSessionTimestamp,
+    ...oldSessionData,
+    creationTimestamp: oldSessionTimestamp,
   });
   //Remove the old data from currentSession_key for new work
   removeItem(currentSession_key);
   //Reset currentUserSessionID
-  saveItem(getCurrentUserSessionID_key(user_id), 0);
+  //saveItem(getCurrentUserSessionID_key(user_id), 0);
   //Reset currentSessionTimestamp
   saveItem(getCurrentSessionTimestamp_key(user_id), currentTimestamp);
 };
@@ -133,8 +133,25 @@ const recycleDataSession = (user_id) => {
 
 const clean_loggedUser_data = () => removeItem("loggedUser_data");
 
+const getPreviousSessionToSaveCondition = (user_id) => {
+  const condition =
+    load_data(getPreviousSession_Key(user_id)) &&
+    load_data(getPreviousSession_Key(user_id)).summaries.list.length > 0;
+  //TODO: A futuro agregar condicional para actas de calabozos
+  return condition;
+};
+
+const getSessionToSaveCondition = (user_id) => {
+  const condition =
+    load_data(getCurrentSession_key(user_id)) &&
+    load_data(getCurrentSession_key(user_id)).summaries.list.length > 0;
+  //TODO: A futuro agregar condicional para actas de calabozos
+  return condition;
+};
+
 export {
   saveItem,
+  loadItem,
   save_ps_data,
   save_currentSession_timestamp,
   save_loggedUser_data,
@@ -143,7 +160,7 @@ export {
   load_data,
   load_globalData,
   clean_loggedUser_data,
-  clean_currentSession,
+  clean_currentUser_data,
   recycleDataSession,
   getCurrentSession_key,
   getCurrentSessionTimestamp_key,
@@ -151,4 +168,6 @@ export {
   getCurrentUserSessionID_key,
   getLocalStorageSize,
   removeItem,
+  getPreviousSessionToSaveCondition,
+  getSessionToSaveCondition,
 };

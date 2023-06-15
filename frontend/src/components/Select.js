@@ -7,7 +7,6 @@ import {
 } from "@mui/material";
 import styled from "@emotion/styled";
 import RenderIf from "components/RenderIf";
-import { verifyPropsReferences } from "helpers/development_debuggin";
 
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
   marginBottom: theme.spacing(2),
@@ -64,24 +63,9 @@ const Select = ({
   required,
   inputProps,
 }) => {
-  //Testing tool (pendiente)
-  /*verifyPropsReferences(
-    {
-      error,
-      label,
-      helperText,
-      value,
-      onChange,
-      options,
-      required,
-      inputProps,
-    },
-    "Select - props"
-  );*/
-  //
   return (
     <StyledFormControl fullWidth>
-      <InputLabel id="select-label" error={error}>
+      <InputLabel id='select-label' error={error}>
         {label}
       </InputLabel>
       <StyledSelect

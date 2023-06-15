@@ -1,4 +1,4 @@
-import { Box, Alert, IconButton, Collapse } from "@mui/material";
+import { Box, Alert, IconButton, Collapse, Typography } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import {
@@ -48,9 +48,9 @@ const FormMessage = ({ severity, open, onClose, children }) => {
         severity={severity}
         action={
           <IconButton
-            aria-label="close"
-            color="inherit"
-            size="small"
+            aria-label='close'
+            color='inherit'
+            size='small'
             onClick={onClose}
           >
             <CloseIcon />
@@ -63,13 +63,19 @@ const FormMessage = ({ severity, open, onClose, children }) => {
   );
 };
 
-const FormSettings = ({ isEdition, unsavedData, onSubmit, onRenew }) => {
+const FormSettings = ({
+  isEdition,
+  isSession = true,
+  unsavedData,
+  onSubmit,
+  onRenew,
+}) => {
   return (
     <ButtonsContainer>
       <Button onClick={onSubmit} disabled={!unsavedData}>
         {isEdition ? "Modificar" : "Agregar"}
       </Button>
-      <RenderIf condition={isEdition}>
+      <RenderIf condition={isEdition && isSession}>
         <Button onClick={onRenew} disabled={unsavedData}>
           Agregar otro
         </Button>

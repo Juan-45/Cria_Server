@@ -14,6 +14,7 @@ const DesktopBar = ({
   openMenu,
   handleClick,
   handleSave,
+  handleLoad,
   handleLogout,
 }) => {
   const { pathname } = useLocation();
@@ -48,6 +49,7 @@ const DesktopBar = ({
       <Options
         handleClick={handleClick}
         handleSave={handleSave}
+        handleLoad={handleLoad}
         handleLogout={handleLogout}
         openMenu={openMenu}
       />

@@ -3,6 +3,7 @@ import { styled } from "@mui/material/styles";
 import { IconButton } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import SaveIcon from "@mui/icons-material/Save";
+import UploadIcon from "@mui/icons-material/Upload";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { TRANSITION_TIME } from "components/CommonStyles";
 
@@ -36,7 +37,13 @@ const OptionsButton = styled(IconButton, {
   },
 }));
 
-const Options = ({ openMenu, handleClick, handleSave, handleLogout }) => {
+const Options = ({
+  openMenu,
+  handleClick,
+  handleSave,
+  handleLoad,
+  handleLogout,
+}) => {
   return (
     <OptionsButton
       aria-label='account_options'
@@ -48,8 +55,12 @@ const Options = ({ openMenu, handleClick, handleSave, handleLogout }) => {
       <SettingsIcon className='options_icon' fontSize='inherit' />
       <StyledList open={openMenu} className='options_list'>
         <StyledItem onClick={handleSave}>
-          Guardar datos
+          Guardar sesión previa
           <SaveIcon className='item_icon' />
+        </StyledItem>
+        <StyledItem onClick={handleLoad}>
+          Cargar sesión previa
+          <UploadIcon className='item_icon' />
         </StyledItem>
         <StyledItem onClick={handleLogout}>
           Cerrar sesión

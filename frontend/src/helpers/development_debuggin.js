@@ -25,7 +25,9 @@ const verifyPropsReferences = (props, componentName) => {
     }
 
     prevPropsRef.current = props;
-  }, [...Object.values(props), props]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [...Object.values(props), props, componentName, prevPropsRef]);
 };
 
 export { verifyPropsReferences };

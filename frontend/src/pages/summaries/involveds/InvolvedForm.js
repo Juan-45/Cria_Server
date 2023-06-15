@@ -1,153 +1,22 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, memo } from "react";
+import useUnsavedFormData from "hooks/useUnsavedFormData";
 import { v4 as uuidv4 } from "uuid";
 import {
+  removeItemFrom,
+  getPropertiesFrom,
+  getInvolvedsNames_by,
+} from "helpers/dataManagement";
+import { Typography } from "@mui/material";
+import {
   FormContainer,
-  FieldsContainer,
   FormMessage,
   FormSettings,
 } from "components/FormStyles";
-import { ResponsiveItem, ResponsiveContainer } from "components/CommonStyles";
-import Select from "components/Select";
-import Input from "components/Input";
+import { Divider } from "components/CommonStyles";
 import RenderIf from "components/RenderIf";
-import { removeItemFrom } from "helpers/dataManagement";
-import { getInputErrorException } from "helpers/error";
-
-const INVOLVED_TYPES = [
-  { val: "isVictim", label: "Vícitma" },
-  { val: "isComplainant", label: "Denunciante" },
-  { val: "isCausant", label: "Causante" },
-  { val: "isAccused", label: "Imputado" },
-];
-
-const GENDERS = [
-  {
-    val: "masculino",
-    label: "Masculino",
-  },
-  { val: "femenino", label: "Femenino" },
-];
-
-const EDUCATED = [
-  {
-    val: "sí",
-    label: "Sí",
-  },
-  {
-    val: "no",
-    label: "No",
-  },
-];
-
-const CIVIL_STATUS_MALE = [
-  {
-    val: "soltero",
-    label: "Soltero",
-  },
-  {
-    val: "casado",
-    label: "Casado",
-  },
-  {
-    val: "divorciado",
-    label: "Divorciado",
-  },
-  {
-    val: "viudo",
-    label: "Viudo",
-  },
-];
-
-const CIVIL_STATUS_FEMALE = [
-  {
-    val: "soltera",
-    label: "Soltera",
-  },
-  {
-    val: "casada",
-    label: "Casada",
-  },
-  {
-    val: "divorciada",
-    label: "Divorciada",
-  },
-  {
-    val: "viuda",
-    label: "Viuda",
-  },
-];
-
-const OCCUPATION_MALE = [
-  {
-    val: "empleado",
-    label: "Empleado",
-  },
-  {
-    val: "desocupado",
-    label: "Desocupado",
-  },
-  {
-    val: "jubilado/pensionado",
-    label: "Jubilado/Pensionado",
-  },
-  {
-    val: "amo de casa",
-    label: "Amo de casa",
-  },
-  {
-    val: "estudiante",
-    label: "Estudiante",
-  },
-  {
-    val: "comerciante",
-    label: "Comerciante",
-  },
-
-  {
-    val: "monotributista",
-    label: "Monotributista",
-  },
-  {
-    val: "changarin",
-    label: "Changarin",
-  },
-];
-
-const OCCUPATION_FEMALE = [
-  {
-    val: "empleada",
-    label: "Empleada",
-  },
-  {
-    val: "desocupada",
-    label: "Desocupada",
-  },
-  {
-    val: "jubilada/pensionada",
-    label: "Jubilada/Pensionada",
-  },
-  {
-    val: "ama de casa",
-    label: "Ama de casa",
-  },
-  {
-    val: "estudiante",
-    label: "Estudiante",
-  },
-  {
-    val: "comerciante",
-    label: "Comerciante",
-  },
-
-  {
-    val: "monotributista",
-    label: "Monotributista",
-  },
-  {
-    val: "changarin",
-    label: "Changarin",
-  },
-];
+import PersonalData from "pages/summaries/involveds/involvedForm/PersonalData";
+import DetaineeFileInitialData from "pages/summaries/involveds/involvedForm/DetaineeFileInitialData";
+import PhysicalFeatures from "pages/summaries/involveds/involvedForm/PhysicalFeatures";
 
 const DEFAULT_FORM_DATA = {
   id: "",
@@ -163,9 +32,52 @@ const DEFAULT_FORM_DATA = {
   dni: "",
   phone: "",
   address: "",
+  //Detainee File data
   city: "Pergamino",
   province: "Buenos Aires",
-  //isDetaineeFileNecessary
+  isDetaineeFileNecessary: "false",
+  //
+  detaineeStatus: "",
+  nickName: "",
+  fatherFullName: "",
+  motherFullName: "",
+  arrestDate: "",
+  arrestAddress: "",
+  felonyDate: "",
+  felonyAddress: "",
+  //physical features
+  aspect: "Normal",
+  bodyBuild: "Delgado",
+  height: "1.70 mts",
+  physicalDefects: "No posee",
+  skindColor: "Blanco",
+  hairColor: "Negro",
+  beardColor: "No posee",
+  beardPeculiarity: "No posee",
+  forehead: "Normal",
+  foreheadPeculiarity: "No posee",
+  eyelids: "Normales",
+  eyelidsPeculiarity: "No posee",
+  irisColor: "Marrón",
+  irisPeculiarity: "No posee",
+  noseProfile: "Recto",
+  noseBase: "Fina",
+  nosePeculiarity: "No posee",
+  mouthSize: "Normal",
+  mouthForm: "Normal",
+  mouthPeculiarity: "No posee",
+  lips: "Normales",
+  chin: "Normal",
+  lips_chinPeculiarity: "No posee",
+  ears: "Normales",
+  earsPeculiarity: "No posee",
+  //distinctive marks and scars
+  physicalPeculiarity: "No posee",
+  headAndNeckPeculiarity: "No posee",
+  rightHandPeculiarity: "No posee",
+  leftHandPeculiarity: "No posee",
+  rightLegPeculiarity: "No posee",
+  leftLegPeculiarity: "No posee",
 };
 
 const DEFAULT_FORM_MESSAGE = {
@@ -184,13 +96,11 @@ const setOptionsByGender = (gender, maleOptions, femaleOptions) => {
   return options;
 };
 
-//TODO: prioridad extra alta: optimizar re-render, ocurre que se re-renderiza toda la página al cambiar un campo
-//de este form --Tal vez sea por re-referenciar objetos hardcodeados en el código, o pasados por props--
-//TODO: prioridad alta: manejar selección de involucrado y actualización de formData
-
 const InvolvedForm = ({
   setUnsavedFormDataConditions,
+  setInvolvedSelected,
   involveds,
+  involvedSelected,
   unsavedInvolvedData,
   manageSummarySubmission,
 }) => {
@@ -199,12 +109,24 @@ const InvolvedForm = ({
   const [requiredError, setRequiredError] = useState(DEFAULT_REQUIRED_ERROR);
 
   const isEdition = formData.id !== "";
+  const isDetaineeFileNecessary = formData.isDetaineeFileNecessary === "true";
+  //In case involved is saved with detainee file data, when selected the following boolean does exist and must be true, otherwise undefined
+  const isDetaineeFileDataReady = formData.isDetaineeFileDataReady;
+  const isAccusedOrCausant =
+    formData.type === "isAccused" || formData.type === "isCausant";
 
-  console.log("ESTADOS InvolvedForm:", {
+  /* console.log("VARIABLES SINC InvolvedForm:", {
+    isEdition,
+    isDetaineeFileNecessary,
+    isDetaineeFileDataReady,
+    isAccusedOrCausant,
+  });*/
+
+  /* console.log("ESTADOS InvolvedForm:", {
     formData,
     formMessage,
     requiredError,
-  });
+  });*/
 
   const getValidFormData = (isDetaineeFileNecessary, formData) => {
     const manageRequiredError = () => {
@@ -233,48 +155,37 @@ const InvolvedForm = ({
       "phone",
       "address",
     ];
-    const isDetaineeFileNecessary_required_keys = [
-      "gender",
-      "city",
-      "province",
-    ]; //A esto le falta las propiedades de lagajo
+
+    const excludedProperties = [
+      "id",
+      "isDetaineeFileNecessary",
+      "isDetaineeFileDataReady",
+    ];
+
+    const isDetaineeFileNecessary_required_keys = getPropertiesFrom(
+      DEFAULT_FORM_DATA,
+      excludedProperties
+    );
 
     if (isDetaineeFileNecessary) {
-      const detaineeInvolvedData = {
-        type: formData.type,
-        fullName: formData.fullName,
-        nationality: formData.nationality,
-        education: formData.education,
-        civilStatus: formData.civilStatus,
-        occupation: formData.occupation,
-        age: formData.age,
-        birthDate: formData.birthDate,
-        dni: formData.dni,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        province: formData.province,
-        gender: formData.gender,
-        //Faltan las propiedades de legajo
-      };
+      const { id, ...detaineeInvolvedData } = formData;
 
       let requiredError;
 
-      [...required_keys, ...isDetaineeFileNecessary_required_keys].forEach(
-        (required_key) => {
-          const requiredValue = detaineeInvolvedData[required_key];
-          if (requiredValue === "") {
-            requiredError = true;
-          }
+      isDetaineeFileNecessary_required_keys.forEach((required_key) => {
+        const requiredValue = detaineeInvolvedData[required_key];
+        if (requiredValue === "") {
+          requiredError = true;
         }
-      );
+      });
 
       if (requiredError) {
         manageRequiredError();
-      } else return detaineeInvolvedData;
+      } else return { ...detaineeInvolvedData, isDetaineeFileDataReady: true };
     } else {
       const nonDetaineeInvolvedData = {
         type: formData.type,
+        gender: formData.gender,
         fullName: formData.fullName,
         nationality: formData.nationality,
         education: formData.education,
@@ -309,25 +220,35 @@ const InvolvedForm = ({
     }));
   };
 
-  const setUnsavedDataHandler = (val) => {
-    if (val) {
-      setUnsavedFormDataConditions((prevState) => ({
-        ...prevState,
-        involveds: true,
-      }));
-      setFormMessage({
-        open: true,
-        severity: "warning",
-        message: "En este formulario hay datos sin guardar.",
-      });
-    } else {
-      setUnsavedFormDataConditions((prevState) => ({
-        ...prevState,
-        involveds: false,
-      }));
-      closeFormMessage();
-    }
-  };
+  const setUnsavedDataHandler = useCallback(
+    (condition) => {
+      if (condition) {
+        setUnsavedFormDataConditions((prevState) => ({
+          ...prevState,
+          involveds: true,
+        }));
+        setFormMessage({
+          open: true,
+          severity: "warning",
+          message: "En este formulario hay datos sin guardar.",
+        });
+      } else {
+        setUnsavedFormDataConditions((prevState) => ({
+          ...prevState,
+          involveds: false,
+        }));
+        setFormMessage((prevState) => {
+          if (prevState.severity === "warning") {
+            return {
+              ...prevState,
+              open: false,
+            };
+          } else return prevState;
+        });
+      }
+    },
+    [setUnsavedFormDataConditions]
+  );
 
   //On successful submission
   const unsetUnsavedDataHandler = useCallback(
@@ -342,10 +263,7 @@ const InvolvedForm = ({
   //Submit function only accesible for the user when unsavedInvolvedData is true thanks to FormSettings
   const submitForm = () => {
     //In case of requiredError returns null
-    const validFormData = getValidFormData(
-      formData.isDetaineeFileNecessary === "true",
-      formData
-    );
+    const validFormData = getValidFormData(isDetaineeFileNecessary, formData);
 
     if (validFormData) {
       let validData;
@@ -356,6 +274,7 @@ const InvolvedForm = ({
           ...involvedsWithoutCurrent,
           { ...validFormData, id: formData.id },
         ];
+        setInvolvedSelected({ ...validFormData, id: formData.id });
       } else {
         const newId = uuidv4();
         if (involveds) {
@@ -363,13 +282,17 @@ const InvolvedForm = ({
         } else {
           validData = [{ ...validFormData, id: newId }];
         }
+        setInvolvedSelected({ ...validFormData, id: newId });
       }
 
-      console.log("DATOS INVOLVED FORM SUBMITTING", {
-        validData,
-        validFormData,
+      manageSummarySubmission(true, {
+        involveds: validData,
+        victims: getInvolvedsNames_by("isVictim", validData),
+        complainants: getInvolvedsNames_by("isComplainant", validData),
+        causants: getInvolvedsNames_by("isCausant", validData),
+        accuseds: getInvolvedsNames_by("isAccused", validData),
       });
-      manageSummarySubmission(true, { involveds: validData });
+
       setFormMessage({
         open: true,
         severity: "success",
@@ -385,399 +308,270 @@ const InvolvedForm = ({
   const renewInvolvedSelected = useCallback(() => {
     setFormData(DEFAULT_FORM_DATA);
     setFormMessage(DEFAULT_FORM_MESSAGE);
+    setInvolvedSelected(null);
     unsetUnsavedDataHandler();
-  }, [unsetUnsavedDataHandler]);
+  }, [unsetUnsavedDataHandler, setInvolvedSelected]);
 
-  //Individual handlers for each field
-  const handleType = (event) => {
-    setUnsavedDataHandler(event.target.value);
-    setFormData((prevState) => ({
-      ...prevState,
-      type: event.target.value,
-    }));
-  };
+  //To manage unsaved field data
+  const getSpredKeys = useCallback((obj, isDetaineeFileNecessary) => {
+    if (isDetaineeFileNecessary) {
+      const { isDetaineeFileDataReady, ...detaineeFileData } = obj;
+      return detaineeFileData;
+    } else {
+      const {
+        type,
+        gender,
+        fullName,
+        nationality,
+        education,
+        civilStatus,
+        occupation,
+        age,
+        birthDate,
+        dni,
+        phone,
+        address,
+      } = obj;
 
-  const handleGender = (event) => {
-    setUnsavedDataHandler(event.target.value);
-    setFormData((prevState) => ({
-      ...prevState,
-      gender: event.target.value,
-      occupation: "",
-      civilStatus: "",
-    }));
-  };
+      return {
+        type,
+        gender,
+        fullName,
+        nationality,
+        education,
+        civilStatus,
+        occupation,
+        age,
+        birthDate,
+        dni,
+        phone,
+        address,
+      };
+    }
+  }, []);
 
-  const handleFullName = (value) => {
-    setUnsavedDataHandler(value);
-    setFormData((prevState) => ({
-      ...prevState,
-      fullName: value,
-    }));
-  };
+  const fieldsData = useMemo(
+    () => getSpredKeys(formData, isDetaineeFileNecessary),
+    [formData, isDetaineeFileNecessary, getSpredKeys]
+  );
 
-  const handleNationality = (value) => {
-    setUnsavedDataHandler(value);
-    setFormData((prevState) => ({
-      ...prevState,
-      nationality: value,
-    }));
-  };
+  useUnsavedFormData({
+    setUnsavedDataHandler,
+    fieldsData,
+    comparisonData: isEdition ? involvedSelected : DEFAULT_FORM_DATA,
+  });
 
-  const handleEducation = (event) => {
-    setUnsavedDataHandler(event.target.value);
-    setFormData((prevState) => ({
-      ...prevState,
-      education: event.target.value,
-    }));
-  };
+  useEffect(() => {
+    const getFormDataValuesFrom = (involvedSelected) => {
+      const commonValues = {
+        id: involvedSelected.id,
+        type: involvedSelected.type,
+        gender: involvedSelected.gender,
+        fullName: involvedSelected.fullName,
+        nationality: involvedSelected.nationality,
+        education: involvedSelected.education,
+        civilStatus: involvedSelected.civilStatus,
+        occupation: involvedSelected.occupation,
+        age: involvedSelected.age,
+        birthDate: involvedSelected.birthDate,
+        dni: involvedSelected.dni,
+        phone: involvedSelected.phone,
+        address: involvedSelected.address,
+      };
 
-  const handleCivilStatus = (event) => {
-    setUnsavedDataHandler(event.target.value);
-    setFormData((prevState) => ({
-      ...prevState,
-      civilStatus: event.target.value,
-    }));
-  };
+      if (involvedSelected.isDetaineeFileNecessary === "true") {
+        return { ...involvedSelected, isDetaineeFileDataReady: true };
+      } else if (
+        involvedSelected.type === "isAccused" ||
+        involvedSelected.type === "isCausant"
+      ) {
+        //To be able to set isDetaineeFileNecessary to true, and then used the default detaineeFile's values
+        return { ...DEFAULT_FORM_DATA, ...commonValues };
+      } else {
+        //To maintain the default values of city and province, it's used the spread operator
+        return {
+          ...commonValues,
+          city: DEFAULT_FORM_DATA.city,
+          province: DEFAULT_FORM_DATA.province,
+        };
+      }
+    };
 
-  const handleOccupation = (event) => {
-    setUnsavedDataHandler(event.target.value);
-    setFormData((prevState) => ({
-      ...prevState,
-      occupation: event.target.value,
-    }));
-  };
+    if (involvedSelected) {
+      //In case of involvedSelected changes from parent component, update local state if id is different
+      if (involvedSelected.id !== formData.id) {
+        setFormData(getFormDataValuesFrom(involvedSelected));
+        if (isEdition) {
+          setFormMessage(DEFAULT_FORM_MESSAGE);
+          setRequiredError(DEFAULT_REQUIRED_ERROR);
+        }
+      }
+    } else {
+      //In case of involvedSelected is null, reset formData to default values
+      if (isEdition) {
+        renewInvolvedSelected();
+      }
+    }
+  }, [involvedSelected, formData.id, isEdition, renewInvolvedSelected]);
 
-  const handleAge = (value) => {
-    setUnsavedDataHandler(value);
-    setFormData((prevState) => ({
-      ...prevState,
-      age: value,
-    }));
-  };
+  const personalData_formData = useMemo(
+    () => ({
+      type: formData.type,
+      gender: formData.gender,
+      fullName: formData.fullName,
+      nationality: formData.nationality,
+      education: formData.education,
+      civilStatus: formData.civilStatus,
+      occupation: formData.occupation,
+      age: formData.age,
+      birthDate: formData.birthDate,
+      dni: formData.dni,
+      phone: formData.phone,
+      address: formData.address,
+      city: formData.city,
+      province: formData.province,
+      isDetaineeFileNecessary: formData.isDetaineeFileNecessary,
+    }),
+    [
+      formData.type,
+      formData.gender,
+      formData.fullName,
+      formData.nationality,
+      formData.education,
+      formData.civilStatus,
+      formData.occupation,
+      formData.age,
+      formData.birthDate,
+      formData.dni,
+      formData.phone,
+      formData.address,
+      formData.city,
+      formData.province,
+      formData.isDetaineeFileNecessary,
+    ]
+  );
 
-  const handleBirthDate = (value) => {
-    setUnsavedDataHandler(value);
-    setFormData((prevState) => ({
-      ...prevState,
-      birthDate: value,
-    }));
-  };
+  const detaineeFileInitialData = useMemo(
+    () => ({
+      detaineeStatus: formData.detaineeStatus,
+      nickName: formData.nickName,
+      fatherFullName: formData.fatherFullName,
+      motherFullName: formData.motherFullName,
+      arrestDate: formData.arrestDate,
+      arrestAddress: formData.arrestAddress,
+      felonyDate: formData.felonyDate,
+      felonyAddress: formData.felonyAddress,
+    }),
+    [
+      formData.detaineeStatus,
+      formData.nickName,
+      formData.fatherFullName,
+      formData.motherFullName,
+      formData.arrestDate,
+      formData.arrestAddress,
+      formData.felonyDate,
+      formData.felonyAddress,
+    ]
+  );
 
-  const handleDni = (value) => {
-    setUnsavedDataHandler(value);
-    setFormData((prevState) => ({
-      ...prevState,
-      dni: value,
-    }));
-  };
-
-  const handlePhone = (value) => {
-    setUnsavedDataHandler(value);
-    setFormData((prevState) => ({
-      ...prevState,
-      phone: value,
-    }));
-  };
-
-  const handleAddress = (value) => {
-    setUnsavedDataHandler(value);
-    setFormData((prevState) => ({
-      ...prevState,
-      address: value,
-    }));
-  };
-
-  const handleCity = (value) => {
-    setUnsavedDataHandler(value);
-    setFormData((prevState) => ({
-      ...prevState,
-      city: value,
-    }));
-  };
-
-  const handleProvince = (value) => {
-    setUnsavedDataHandler(value);
-    setFormData((prevState) => ({
-      ...prevState,
-      province: value,
-    }));
-  };
-
-  const valueIsNotDefault = {
-    type: formData.type !== "" && true,
-    gender: formData.gender !== "" && true,
-    fullName: formData.fullName !== "" && true,
-    nationality: formData.nationality !== "" && true,
-    education: formData.education !== "" && true,
-    civilStatus: formData.civilStatus !== "" && true,
-    occupation: formData.occupation !== "" && true,
-    age: formData.age !== "" && true,
-    birthDate: formData.birthDate !== "" && true,
-    dni: formData.dni !== "" && true,
-    phone: formData.phone !== "" && true,
-    address: formData.address !== "" && true,
-    city: formData.city !== "" && true,
-    province: formData.province !== "" && true,
-  };
+  const detaineeFilePhysicalFeatures = useMemo(
+    () => ({
+      aspect: formData.aspect,
+      bodyBuild: formData.bodyBuild,
+      height: formData.height,
+      physicalDefects: formData.physicalDefects,
+      skindColor: formData.skindColor,
+      hairColor: formData.hairColor,
+      beardColor: formData.beardColor,
+      beardPeculiarity: formData.beardPeculiarity,
+      forehead: formData.forehead,
+      foreheadPeculiarity: formData.foreheadPeculiarity,
+      eyelids: formData.eyelids,
+      eyelidsPeculiarity: formData.eyelidsPeculiarity,
+      irisColor: formData.irisColor,
+      irisPeculiarity: formData.irisPeculiarity,
+      noseProfile: formData.noseProfile,
+      noseBase: formData.noseBase,
+      nosePeculiarity: formData.nosePeculiarity,
+      mouthSize: formData.mouthSize,
+      mouthForm: formData.mouthForm,
+      mouthPeculiarity: formData.mouthPeculiarity,
+      lips: formData.lips,
+      chin: formData.chin,
+      lips_chinPeculiarity: formData.lips_chinPeculiarity,
+      ears: formData.ears,
+      earsPeculiarity: formData.earsPeculiarity,
+      //distinctive marks and scars
+      physicalPeculiarity: formData.physicalPeculiarity,
+      headAndNeckPeculiarity: formData.headAndNeckPeculiarity,
+      rightHandPeculiarity: formData.rightHandPeculiarity,
+      leftHandPeculiarity: formData.leftHandPeculiarity,
+      rightLegPeculiarity: formData.rightLegPeculiarity,
+      leftLegPeculiarity: formData.leftLegPeculiarity,
+    }),
+    [
+      formData.aspect,
+      formData.bodyBuild,
+      formData.height,
+      formData.physicalDefects,
+      formData.skindColor,
+      formData.hairColor,
+      formData.beardColor,
+      formData.beardPeculiarity,
+      formData.forehead,
+      formData.foreheadPeculiarity,
+      formData.eyelids,
+      formData.eyelidsPeculiarity,
+      formData.irisColor,
+      formData.irisPeculiarity,
+      formData.noseProfile,
+      formData.noseBase,
+      formData.nosePeculiarity,
+      formData.mouthSize,
+      formData.mouthForm,
+      formData.mouthPeculiarity,
+      formData.lips,
+      formData.chin,
+      formData.lips_chinPeculiarity,
+      formData.ears,
+      formData.earsPeculiarity,
+      //distinctive marks and scars
+      formData.physicalPeculiarity,
+      formData.headAndNeckPeculiarity,
+      formData.rightHandPeculiarity,
+      formData.leftHandPeculiarity,
+      formData.rightLegPeculiarity,
+      formData.leftLegPeculiarity,
+    ]
+  );
 
   return (
-    <FormContainer className="column max1200">
-      <FieldsContainer>
-        <ResponsiveItem className="max-3-columns">
-          <ResponsiveContainer className="paddingInBetween">
-            <ResponsiveItem>
-              <Select
-                label="Tipo"
-                value={formData.type}
-                onChange={handleType}
-                options={INVOLVED_TYPES}
-                inputProps={{ disabled: isEdition }}
-                required
-                error={getInputErrorException(
-                  requiredError.error,
-                  valueIsNotDefault.type
-                )}
-                helperText={getInputErrorException(
-                  requiredError.helperText,
-                  valueIsNotDefault.type
-                )}
-              />
-            </ResponsiveItem>
-            <ResponsiveItem>
-              <Select
-                label="Género"
-                value={formData.gender}
-                onChange={handleGender}
-                options={GENDERS}
-                required
-                error={getInputErrorException(
-                  requiredError.error,
-                  valueIsNotDefault.gender
-                )}
-                helperText={getInputErrorException(
-                  requiredError.helperText,
-                  valueIsNotDefault.gender
-                )}
-              />
-            </ResponsiveItem>
-          </ResponsiveContainer>
-          <Input
-            label="Apellido y nombre"
-            value={formData.fullName}
-            onChange={handleFullName}
-            required
-            error={getInputErrorException(
-              requiredError.error,
-              valueIsNotDefault.fullName
-            )}
-            helperText={getInputErrorException(
-              requiredError.helperText,
-              valueIsNotDefault.fullName
-            )}
-          />
-          <ResponsiveContainer className="paddingInBetween">
-            <ResponsiveItem>
-              <Input
-                label="Nacionalidad"
-                value={formData.nationality}
-                onChange={handleNationality}
-                required
-                error={getInputErrorException(
-                  requiredError.error,
-                  valueIsNotDefault.nationality
-                )}
-                helperText={getInputErrorException(
-                  requiredError.helperText,
-                  valueIsNotDefault.fullName
-                )}
-              />
-            </ResponsiveItem>
-            <ResponsiveItem>
-              <Select
-                label="Instrucción"
-                value={formData.education}
-                onChange={handleEducation}
-                options={EDUCATED}
-                required
-                error={getInputErrorException(
-                  requiredError.error,
-                  valueIsNotDefault.education
-                )}
-                helperText={getInputErrorException(
-                  requiredError.helperText,
-                  valueIsNotDefault.education
-                )}
-              />
-            </ResponsiveItem>
-          </ResponsiveContainer>
-        </ResponsiveItem>
-        <ResponsiveItem className="max-3-columns">
-          <ResponsiveContainer className="paddingInBetween">
-            <ResponsiveItem>
-              <Select
-                label="Estado civil"
-                value={formData.civilStatus}
-                onChange={handleCivilStatus}
-                options={setOptionsByGender(
-                  formData.gender,
-                  CIVIL_STATUS_MALE,
-                  CIVIL_STATUS_FEMALE
-                )}
-                required
-                error={getInputErrorException(
-                  requiredError.error,
-                  valueIsNotDefault.civilStatus
-                )}
-                helperText={getInputErrorException(
-                  requiredError.helperText,
-                  valueIsNotDefault.civilStatus
-                )}
-              />
-            </ResponsiveItem>
-            <ResponsiveItem>
-              <Select
-                label="Ocupación"
-                value={formData.occupation}
-                onChange={handleOccupation}
-                options={setOptionsByGender(
-                  formData.gender,
-                  OCCUPATION_MALE,
-                  OCCUPATION_FEMALE
-                )}
-                required
-                error={getInputErrorException(
-                  requiredError.error,
-                  valueIsNotDefault.occupation
-                )}
-                helperText={getInputErrorException(
-                  requiredError.helperText,
-                  valueIsNotDefault.occupation
-                )}
-              />
-            </ResponsiveItem>
-          </ResponsiveContainer>
-          <ResponsiveContainer className="paddingInBetween">
-            <ResponsiveItem>
-              <Input
-                label="Edad"
-                value={formData.age}
-                onChange={handleAge}
-                required
-                error={getInputErrorException(
-                  requiredError.error,
-                  valueIsNotDefault.age
-                )}
-                helperText={getInputErrorException(
-                  requiredError.helperText,
-                  valueIsNotDefault.age
-                )}
-              />
-            </ResponsiveItem>
-            <ResponsiveItem>
-              <Input
-                label="Fecha de nacimiento"
-                value={formData.birthDate}
-                onChange={handleBirthDate}
-                required
-                helperText={
-                  requiredError.helperText
-                    ? getInputErrorException(
-                        requiredError.helperText,
-                        valueIsNotDefault.birthDate
-                      )
-                    : "dd/mm/yyyy"
-                }
-                error={getInputErrorException(
-                  requiredError.error,
-                  valueIsNotDefault.birthDate
-                )}
-              />
-            </ResponsiveItem>
-          </ResponsiveContainer>
-          <ResponsiveContainer className="paddingInBetween">
-            <ResponsiveItem>
-              <Input
-                label="DNI"
-                value={formData.dni}
-                onChange={handleDni}
-                required
-                error={getInputErrorException(
-                  requiredError.error,
-                  valueIsNotDefault.dni
-                )}
-                helperText={getInputErrorException(
-                  requiredError.helperText,
-                  valueIsNotDefault.dni
-                )}
-              />
-            </ResponsiveItem>
-            <ResponsiveItem>
-              <Input
-                label="Teléfono"
-                value={formData.phone}
-                onChange={handlePhone}
-                required
-                error={getInputErrorException(
-                  requiredError.error,
-                  valueIsNotDefault.phone
-                )}
-                helperText={getInputErrorException(
-                  requiredError.helperText,
-                  valueIsNotDefault.phone
-                )}
-              />
-            </ResponsiveItem>
-          </ResponsiveContainer>
-        </ResponsiveItem>
-        <ResponsiveItem className="max-3-columns">
-          <Input
-            label="Domicilio"
-            value={formData.address}
-            onChange={handleAddress}
-            required
-            helperText={
-              requiredError.helperText
-                ? getInputErrorException(
-                    requiredError.helperText,
-                    valueIsNotDefault.address
-                  )
-                : "Use formato calle nro. 111"
-            }
-            error={getInputErrorException(
-              requiredError.error,
-              valueIsNotDefault.address
-            )}
-          />
-          <Input
-            label="Localidad"
-            value={formData.city}
-            onChange={handleCity}
-            required
-            error={getInputErrorException(
-              requiredError.error,
-              valueIsNotDefault.city
-            )}
-            helperText={getInputErrorException(
-              requiredError.helperText,
-              valueIsNotDefault.city
-            )}
-          />
-          <Input
-            label="Provincia"
-            value={formData.province}
-            onChange={handleProvince}
-            required
-            error={getInputErrorException(
-              requiredError.error,
-              valueIsNotDefault.province
-            )}
-            helperText={getInputErrorException(
-              requiredError.helperText,
-              valueIsNotDefault.province
-            )}
-          />
-        </ResponsiveItem>
-      </FieldsContainer>
+    <FormContainer className='column max1200'>
+      <PersonalData
+        formData={personalData_formData}
+        isEdition={isEdition}
+        setFormData={setFormData}
+        requiredError={requiredError}
+        setOptionsByGender={setOptionsByGender}
+        isAccusedOrCausant={isAccusedOrCausant}
+        isDetaineeFileDataReady={isDetaineeFileDataReady}
+      />
+      <RenderIf condition={isDetaineeFileNecessary}>
+        <Divider />
+        <Typography variant='h3'>Datos para legajo</Typography>
+        <DetaineeFileInitialData
+          formData={detaineeFileInitialData}
+          setFormData={setFormData}
+          requiredError={requiredError}
+          setOptionsByGender={setOptionsByGender}
+        />
+        <Typography variant='h3'>Características físicas</Typography>
+        <PhysicalFeatures
+          formData={detaineeFilePhysicalFeatures}
+          setFormData={setFormData}
+          requiredError={requiredError}
+        />
+      </RenderIf>
       <FormMessage
         open={formMessage.open}
         onClose={closeFormMessage}
@@ -795,4 +589,4 @@ const InvolvedForm = ({
   );
 };
 
-export default InvolvedForm;
+export default memo(InvolvedForm);

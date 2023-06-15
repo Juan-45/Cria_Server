@@ -13,7 +13,7 @@ import ScrollToTop from "components/ScrollToTop";
 import Login from "pages/Login";
 import SelectSession from "pages/SelectSession";
 import Summaries from "pages/Summaries";
-import Home2 from "pages/Home2";
+//import Home2 from "pages/Home2";
 
 const ROOT_PATH = "/";
 const SESSION_TYPE = "/sessionType";
@@ -52,13 +52,7 @@ const AppOs = () => {
     isCurrentUser_null: sessionState.currentUser ? false : true,
   });
 
-  const {
-    filesPicker,
-    manage_service_filesSubFolder,
-    manage_backup_subFolder,
-  } = useFileManager({
-    currentUser_id: sessionState.currentUser && sessionState.currentUser.id,
-  });
+  const { getSummaryFiles, saveBackup, filesPicker } = useFileManager();
 
   const { pathname } = useLocation();
 
@@ -97,20 +91,17 @@ const AppOs = () => {
               globalData.session_previous &&
               globalData.session_previous.summaries
             }
-            setGlobalData={setGlobalData}
             updateSessionSummaries={updateSessionSummaries}
             updatePreviousSessionSummaries={updatePreviousSessionSummaries}
-            filesPicker={filesPicker}
-            manage_service_filesSubFolder={manage_service_filesSubFolder}
-            manage_backup_subFolder={manage_backup_subFolder}
+            getSummaryFiles={getSummaryFiles}
           />
         ),
       },
-      {
+      /* {
         to: "/home2",
         label: "Home2",
         element: <Home2 />,
-      },
+      },*/
     ];
   }, [
     setSessionState,
@@ -118,12 +109,9 @@ const AppOs = () => {
     sessionState.currentUser,
     globalData.session,
     globalData.session_previous,
-    setGlobalData,
-    filesPicker,
-    manage_service_filesSubFolder,
-    manage_backup_subFolder,
     updatePreviousSessionSummaries,
     updateSessionSummaries,
+    getSummaryFiles,
   ]);
 
   const navBarOptions = useMemo(() => {
@@ -168,8 +156,11 @@ const AppOs = () => {
               !isUserLogged ||
               pathname === SESSION_TYPE
             }
+            saveBackup={saveBackup}
+            filesPicker={filesPicker}
             handleManualClosing={manualClosing}
             currentUser={sessionState.currentUser}
+            setGlobalData={setGlobalData}
           >
             <PageRender
               routesOptions={routesOptions}

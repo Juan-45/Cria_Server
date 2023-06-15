@@ -85,7 +85,7 @@ const useAxios = (method) => {
     //Callback call in case the component unmounts
     return () => {
       axiosController.abort();
-      console.log("Axios request--- Aborted");
+      //console.log("Axios request--- Aborted");
     };
   }, [axiosController]);
 

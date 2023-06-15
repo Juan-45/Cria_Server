@@ -19,6 +19,9 @@ const PageContainer = ({
   hideNavBar,
   handleManualClosing,
   currentUser,
+  saveBackup,
+  filesPicker,
+  setGlobalData,
 }) => {
   return (
     <Container topSpace={!hideNavBar}>
@@ -27,6 +30,9 @@ const PageContainer = ({
           navigationOptions={navBarOptions}
           handleManualClosing={handleManualClosing}
           currentUser={currentUser}
+          saveBackup={saveBackup}
+          filesPicker={filesPicker}
+          setGlobalData={setGlobalData}
         />
       </RenderIf>
       {children}

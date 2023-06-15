@@ -72,16 +72,16 @@ const InteractiveList = ({
         />
       ));
     } else {
-      return <NoDataItem>No hay datos</NoDataItem>;
+      return <NoDataItem>-----------</NoDataItem>;
     }
   }, [list, selectItem, deleteItem, selectedItemId]);
 
   return (
     <ListWrapper
-      component="nav"
-      aria-labelledby="nested-list-subheader"
+      component='nav'
+      aria-labelledby='nested-list-subheader'
       subheader={
-        <ListSubheader component="div" id="nested-list-subheader">
+        <ListSubheader component='div' id='nested-list-subheader'>
           {title}
         </ListSubheader>
       }

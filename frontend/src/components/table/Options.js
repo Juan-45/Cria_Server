@@ -1,3 +1,4 @@
+import useMemu from "hooks/useMemu";
 import { StyledItem, StyledList } from "components/MenuStyles";
 import { styled } from "@mui/material/styles";
 import { IconButton } from "@mui/material";
@@ -5,7 +6,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { TRANSITION_TIME } from "components/CommonStyles";
-import useMemu from "hooks/useMemu";
+import RenderIf from "components/RenderIf";
 
 const OptionsButton = styled(IconButton, {
   shouldForwardProp: (props) => props !== "open",
@@ -38,7 +39,7 @@ const OptionsButton = styled(IconButton, {
   },
 }));
 
-const Options = ({ handleSelect, handleDelete }) => {
+const Options = ({ handleSelect, handleDelete, noDeletion = false }) => {
   const { handleClick, openMenu } = useMemu();
 
   return (
@@ -55,10 +56,12 @@ const Options = ({ handleSelect, handleDelete }) => {
           Seleccionar
           <EditIcon className='item_icon' />
         </StyledItem>
-        <StyledItem onClick={handleDelete} className='list_item'>
-          Eliminar
-          <DeleteIcon className='item_icon' />
-        </StyledItem>
+        <RenderIf condition={!noDeletion}>
+          <StyledItem onClick={handleDelete} className='list_item'>
+            Eliminar
+            <DeleteIcon className='item_icon' />
+          </StyledItem>
+        </RenderIf>
       </StyledList>
     </OptionsButton>
   );

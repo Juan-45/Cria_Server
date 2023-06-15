@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { removeItemFrom } from "helpers/dataManagement";
-import { verifyPropsReferences } from "helpers/development_debuggin";
 
 const DEFAULT_unsavedFormDataConditions = {
   initialData: false,
@@ -12,11 +11,9 @@ const DEFAULT_unsavedFormDataConditions = {
 const useSummaries = ({
   sessionSummaries,
   session_previousSummaries,
-  setGlobalData,
   updatePreviousSessionSummaries,
   updateSessionSummaries,
 }) => {
-  //TODO: MANEJAR CASO DE "ADVERTENCIA" EN CASO DE USO DE NAVEGACIÓN DE LA APP Y EXISTEN DATOS SIN GUARDAR EN FORMS
   const [session_summaries, setSession_summaries] = useState(sessionSummaries);
   const [session_previous_summaries, setSession_previous_summaries] = useState(
     session_previousSummaries
@@ -58,17 +55,6 @@ const useSummaries = ({
     DEFAULT_unsavedFormDataConditions
   );
 
-  //TODO: summarySelected tiene que tener también las siguientes propiedades para tabla: summary_by, victims (str: composición de nombres), complainants, causants, accused
-  //TODO: para simplicidad usar una propiedad involveds dentro de summarySelected.
-  //TODO: El único lugar dentro de la sección de involucrados o vehículos donde corresponde usar una comparación de version_id es al editar un involucrado o vehìculos, pero ese
-  //version_id tiene que ser propio del involucrado o vehìculo seleccionado, no el version_id usado para modificar initialData
-  //TODO: Cada modificación a summarySelected, sea por initialData, involveds o vehicles debe modificar el id de summaries sea en session o previous_sesssion
-  //(garantizar actualización desde LS)
-
-  //botón para agregar/modificar => agregar implica agregar
-  //a tabla, actualizar selección actual y habilitar accordion retraible con sección "Datos de involucrados";
-  //armar listados de vtmas, dctes, etc; formulario de circunstancias personales
-
   //Show warning in case there is unsaved data or execute callback for session_type change or summary selection change
   const manageUnsavedDataError = useCallback(
     (callback, setStateWarning) => {
@@ -93,13 +79,6 @@ const useSummaries = ({
     ]
   );
 
-  //TODO: FALTA involvedsSelector, involvedForm,omitir los inputs por ahora
-  //Testing tool
-  /* verifyPropsReferences(
-    { unsavedFormDataConditions },
-    "useSummaries - unsavedFormDataConditions"
-  );*/
-  //
   const changeSessionType = (newValue) => {
     setIsSession(newValue);
     setSummarySelected(null);
@@ -181,6 +160,7 @@ const useSummaries = ({
   const deleteSummary = useCallback(() => {
     let updated_list;
     const newId = uuidv4();
+    //Delete summary only in current session
     if (isSession) {
       //Work with session summaries
 
@@ -193,7 +173,7 @@ const useSummaries = ({
         list: updated_list,
         id: newId,
       }));
-    } else {
+    } /*else {
       //Work with session_previous summaries
       updated_list = removeItemFrom(
         session_previous_summaries.list,
@@ -204,7 +184,7 @@ const useSummaries = ({
         list: updated_list,
         id: newId,
       }));
-    }
+    }*/
     //In case selected summary is deleted
     if (summarySelected && table_row_id_deletion === summarySelected.id) {
       setSummarySelected(null);
@@ -214,13 +194,13 @@ const useSummaries = ({
       warning: false,
     }));
   }, [
-    session_previous_summaries,
+    //  session_previous_summaries,
     session_summaries,
     summarySelected,
     table_row_id_deletion,
     isSession,
     updateSessionSummaries,
-    updatePreviousSessionSummaries,
+    // updatePreviousSessionSummaries,
   ]);
 
   //InitialDataForm, InvolvedDataForm, VehiclesDataForm callback for submission
@@ -261,6 +241,7 @@ const useSummaries = ({
           }));
         }
       } else {
+        //Add new summary only if isSession === true, it's not possible to add new summary to previous session
         setSummarySelected((prevState) => ({
           ...prevState,
           ...validData,
@@ -269,19 +250,6 @@ const useSummaries = ({
         }));
         if (isSession) {
           updateSessionSummaries((prevSummaries) => ({
-            id: newId,
-            list: [
-              ...prevSummaries.list,
-              {
-                ...summarySelected,
-                ...validData,
-                id: newId,
-                version_id: newVersionId,
-              },
-            ],
-          }));
-        } else {
-          updatePreviousSessionSummaries((prevSummaries) => ({
             id: newId,
             list: [
               ...prevSummaries.list,
@@ -343,9 +311,10 @@ const useSummaries = ({
         setSummarySelected(null);
         setInfoData({
           info: true,
-          title: "Ha eliminado los datos seleccionados desde otra pestaña.",
-          message:
-            "No debe trabajar con datos de un mismo sumario en más de una pestaña.",
+          title: "Se han eliminado los datos seleccionados.",
+          message: isSession
+            ? "Ha eliminado el sumario actual desde otra pestaña. No debe trabajar con datos de un mismo sumario en más de una pestaña."
+            : "Este mensaje aparece cuando elimina los datos seleccionados desde otra pestaña o cuando estos se sobre-escriben ya que cargo datos mediante archivo.",
         });
       }
     };
@@ -395,7 +364,7 @@ const useSummaries = ({
           clean_summarySelected();
           //In case LS is updated from another tab but are the initial data, involveds or vehicles forms that fired the update, same summaries id but different version_id for
           //the selectedSummary updated
-          manageSelectedSummary_editionWarning(sessionSummaries);
+          manageSelectedSummary_editionWarning(session_previousSummaries);
         }
       } else setSession_previous_summaries(session_previousSummaries);
     }
@@ -424,8 +393,6 @@ const useSummaries = ({
     setUnsavedWarningData_selectSummary,
     setEdition_warningData,
     setInfoData,
-    setSession_summaries,
-    setSession_previous_summaries,
     setUnsavedFormDataConditions,
     setSummarySelected,
     selectSummary,

@@ -89,6 +89,7 @@ const TableBasic = ({
   selectedSummaryId,
   selectSummary,
   openDeleteWarning,
+  noDeleteSummary,
 }) => {
   const [page, setPage] = useState(0);
 
@@ -125,7 +126,7 @@ const TableBasic = ({
         <StyledTableCell
           key={header.key}
           align={index !== 0 ? "right" : "left"}
-          className="head"
+          className='head'
         >
           {header.label}
         </StyledTableCell>
@@ -140,11 +141,11 @@ const TableBasic = ({
           return (
             <StyledTableCell
               key={header.key}
-              component="th"
-              scope="row"
+              component='th'
+              scope='row'
               className={selectedSummaryId === currentRow.id ? "selected" : ""}
             >
-              <Box className="firstCellContainer">
+              <Box className='firstCellContainer'>
                 <RadioButtonCheckedIcon />
                 {manageDefaultStringForTable(currentRow[header.key])}
               </Box>
@@ -152,7 +153,7 @@ const TableBasic = ({
           );
         } else {
           return (
-            <StyledTableCell key={header.key} align="right">
+            <StyledTableCell key={header.key} align='right'>
               {manageDefaultStringForTable(currentRow[header.key])}
             </StyledTableCell>
           );
@@ -160,15 +161,16 @@ const TableBasic = ({
       });
       return [
         ...cells,
-        <StyledTableCell key={"settings"} align="center">
+        <StyledTableCell key={"settings"} align='center'>
           <Options
             handleSelect={() => selectSummary(currentRow.id)}
             handleDelete={() => openDeleteWarning(currentRow.id)}
+            noDeletion={noDeleteSummary}
           />
         </StyledTableCell>,
       ];
     },
-    [head, selectSummary, openDeleteWarning, selectedSummaryId]
+    [head, selectSummary, openDeleteWarning, selectedSummaryId, noDeleteSummary]
   );
 
   //If table is used for rows with more than 2 cell, the following key could be get from the first and the second value
@@ -178,8 +180,8 @@ const TableBasic = ({
         <StyledTableRow>
           <StyledTableCell
             colSpan={head.length + 1}
-            align="center"
-            className="noData"
+            align='center'
+            className='noData'
           >
             No hay datos
           </StyledTableCell>
@@ -215,7 +217,7 @@ const TableBasic = ({
   return (
     <StyledPaper square>
       <TableContainer>
-        <Table size="small" aria-label="simple table">
+        <Table size='small' aria-label='simple table'>
           <TableHead>
             <StyledTableRow>{headCells}</StyledTableRow>
           </TableHead>
@@ -235,7 +237,7 @@ const TableBasic = ({
       </TableContainer>
       <TablePagination
         rowsPerPageOptions={[ROWS_PER_PAGE]}
-        component="div"
+        component='div'
         count={data.length}
         rowsPerPage={ROWS_PER_PAGE}
         page={page}

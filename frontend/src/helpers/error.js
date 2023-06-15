@@ -6,4 +6,9 @@ const getInputErrorException = (error, errorConditionException = false) => {
   }
 };
 
-export { getInputErrorException };
+const getValueIsNotDefinedCondition = (value) => {
+  const condition = value !== "" && true;
+  return condition;
+};
+
+export { getInputErrorException, getValueIsNotDefinedCondition };

@@ -25,19 +25,36 @@ const SecreatryLabel = styled(Typography)(({ theme }) => ({
   },
 }));
 
-const NavBar = ({ navigationOptions, handleManualClosing, currentUser }) => {
+const NavBar = ({
+  navigationOptions,
+  handleManualClosing,
+  currentUser,
+  saveBackup,
+  filesPicker,
+  setGlobalData,
+}) => {
   const {
     handleClick,
     handleSave,
+    handleLoad,
     handleLogout,
     handleSaveOnLogout,
     handleLogoutWithoutSaving,
+    ignoreLoadingWarning,
     setOpenInfo,
     setOpenWarning,
     openMenu,
     openInfo,
     openWarning,
-  } = useSessionOptions(handleManualClosing);
+    fileWarning,
+    setFileWarning,
+  } = useSessionOptions({
+    manualClosing: handleManualClosing,
+    currentUserId: currentUser.id,
+    saveBackup,
+    filesPicker,
+    setGlobalData,
+  });
 
   return (
     <>
@@ -46,25 +63,50 @@ const NavBar = ({ navigationOptions, handleManualClosing, currentUser }) => {
         setOpen={setOpenWarning}
         onAccept={handleSaveOnLogout}
         onCancel={handleLogoutWithoutSaving}
-        title={"Existen datos que puede guardar."}
+        title={"Existen datos de sesión previa que puede guardar."}
         message={
-          "Existen datos de actuaciones, inspecciones de calabozo o conteo de detenidos. ¿Desea que estos datos se guarden mediante archivo?"
+          //"Existen datos de actuaciones, inspecciones de calabozo o conteo de detenidos. ¿Desea que estos datos se guarden mediante archivo?"
+          "Existen datos de actuaciones en la sesión previa, si los va a necesitar en una próxima guardia guardelos para evitar perderlos. ¿Desea guardarlos mediante archivo?"
         }
+      />
+      <WarningPopUp
+        open={fileWarning.warning}
+        withOptions={fileWarning.withOptions}
+        setOpen={(val) =>
+          setFileWarning((prevState) => ({
+            ...prevState,
+            warning: val,
+            withOptions: true,
+          }))
+        }
+        onAccept={ignoreLoadingWarning}
+        onCancel={() =>
+          setFileWarning((prevState) => ({
+            ...prevState,
+            warning: false,
+            withOptions: true,
+          }))
+        }
+        title={fileWarning.title}
+        message={fileWarning.message}
       />
       <InfoPopUp
         open={openInfo}
         setOpen={setOpenInfo}
-        title={"No existen datos para guardar."}
+        title={"No existen datos de 'Sesión previa' para guardar."}
         message={
-          "No existen datos de actuaciones, inspecciones de calabozo o conteo de detenidos."
+          //"No existen datos de actuaciones, inspecciones de calabozo o conteo de detenidos."
+          "Solo los datos de sesión previa serán guardados."
         }
       />
+
       <NavBarContainer role='navigation'>
         <Box className='flex_max_1200'>
           <DesktopBar
             navigationOptions={navigationOptions}
             handleClick={handleClick}
             handleSave={handleSave}
+            handleLoad={handleLoad}
             handleLogout={handleLogout}
             openMenu={openMenu}
           />

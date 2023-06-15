@@ -108,9 +108,15 @@ const theme = createTheme({
       },
       marginBottom: "24px",
     },
+    h3: {
+      lineHeight: 1.2,
+      fontSize: "1.5rem",
+      marginBottom: "24px",
+    },
     subtitle1: {
       lineHeight: 1.2,
       fontWeight: 600,
+      marginBottom: "16px",
       [tablet_min_600]: {
         fontSize: "1.2rem",
       },

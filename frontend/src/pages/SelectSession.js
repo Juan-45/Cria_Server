@@ -6,7 +6,10 @@ import {
   Button,
   FullscreenColumn,
 } from "components/CommonStyles";
-import { clean_currentSession, recycleDataSession } from "helpers/localStorage";
+import {
+  clean_currentUser_data,
+  recycleDataSession,
+} from "helpers/localStorage";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2),
@@ -41,7 +44,7 @@ const SelectSession = ({ currentUser }) => {
   const navigate = useNavigate();
 
   const initNewSession = () => {
-    clean_currentSession(currentUser.id);
+    clean_currentUser_data(currentUser.id);
     navigate(HOME_PATH);
   };
 
@@ -70,7 +73,8 @@ const SelectSession = ({ currentUser }) => {
           <Title variant='h2'>Sesión previa.</Title>
           <Text>
             Necesita continuar trabajando con los datos de la sesión más
-            reciente.
+            reciente, estos se cargarán en la aplicación cómo &quot;Sesion
+            Previa&quot;.
           </Text>
           <Button onClick={continuePreviousSession}>Seleccionar</Button>
         </StyledPaper>

@@ -134,7 +134,7 @@ const StyledItemTitle = styled(Typography)(({ theme }) =>
 );
 
 const ItemTitle = ({ children, ...props }) => (
-  <StyledItemTitle variant="h2" {...props}>
+  <StyledItemTitle variant='h2' {...props}>
     {children}
   </StyledItemTitle>
 );

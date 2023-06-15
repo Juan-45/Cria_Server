@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, memo } from "react";
+import { useState, useEffect, useCallback, memo, useMemo } from "react";
+import useUnsavedFormData from "hooks/useUnsavedFormData";
 import {
   FormContainer,
   FieldsContainer,
@@ -10,8 +11,10 @@ import Input from "components/Input";
 import RenderIf from "components/RenderIf";
 import Combobox from "components/Combobox";
 import { ResponsiveItem } from "components/CommonStyles";
-import { getInputErrorException } from "helpers/error";
-import { verifyPropsReferences } from "helpers/development_debuggin";
+import {
+  getInputErrorException,
+  getValueIsNotDefinedCondition,
+} from "helpers/error";
 
 const SUMMARY_TYPES = [
   { val: "isSummary", label: "Actuaciones por hecho" },
@@ -31,16 +34,13 @@ const DEFAULT_FORM_DATA = {
   instructor: "",
   instructor_rank: "",
   instructor_id: "",
-  instructor_obj: { val: "", id: "" },
   //type isSummary
   prosecution: "",
   prosecutor: "",
   prosecution_id: "",
-  prosecution_obj: { val: "", id: "" },
   court: "",
   judge: "",
   court_id: "",
-  court_obj: { val: "", id: "" },
   //type isWhereabouts or isCapture
   judicialBody: "",
   isn: "",
@@ -65,26 +65,16 @@ const InitialDataForm = ({
   unsavedInitialData,
   manageSummarySubmission,
   setSummarySelected,
+  isSession,
 }) => {
-  verifyPropsReferences(
-    {
-      ps_data,
-      setUnsavedFormDataConditions,
-      summarySelected,
-      unsavedInitialData,
-      manageSummarySubmission,
-      setSummarySelected,
-    },
-    "InitialDataForm - props"
-  );
-
   const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
   const [formMessage, setFormMessage] = useState(DEFAULT_FORM_MESSAGE);
   const [requiredError, setRequiredError] = useState(DEFAULT_REQUIRED_ERROR);
 
   const isEdition = formData.id !== "";
+  const isSummary = formData.type === "isSummary";
 
-  console.log("ESTADOS InitialData:", { formData, formMessage, requiredError });
+  // console.log("ESTADOS InitialData:", { formData, formMessage, requiredError });
 
   const getValidInitialData = (isSummary, formData) => {
     const manageRequiredError = () => {
@@ -183,30 +173,37 @@ const InitialDataForm = ({
     [setUnsavedFormDataConditions]
   );
 
-  const setUnsavedDataHandler = (val) => {
-    if (val) {
-      setUnsavedFormDataConditions((prevState) => ({
-        ...prevState,
-        initialData: true,
-      }));
-      setFormMessage({
-        open: true,
-        severity: "warning",
-        message: "En este formulario hay datos sin guardar.",
-      });
-    } else {
-      unsetUnsavedDataHandler();
-      closeFormMessage();
-    }
-  };
+  const setUnsavedDataHandler = useCallback(
+    (condition) => {
+      if (condition) {
+        setUnsavedFormDataConditions((prevState) => ({
+          ...prevState,
+          initialData: true,
+        }));
+        setFormMessage({
+          open: true,
+          severity: "warning",
+          message: "En este formulario hay datos sin guardar.",
+        });
+      } else {
+        unsetUnsavedDataHandler();
+        setFormMessage((prevState) => {
+          if (prevState.severity === "warning") {
+            return {
+              ...prevState,
+              open: false,
+            };
+          } else return prevState;
+        });
+      }
+    },
+    [setUnsavedFormDataConditions, unsetUnsavedDataHandler]
+  );
 
   //Submit function only accesible for the user when unsavedInitialData is true thanks to FormSettings
   const submitForm = () => {
     //In case of requiredError returns null
-    const validData = getValidInitialData(
-      formData.type === "isSummary",
-      formData
-    );
+    const validData = getValidInitialData(isSummary, formData);
 
     if (validData) {
       manageSummarySubmission(isEdition, validData);
@@ -240,7 +237,6 @@ const InitialDataForm = ({
   };
 
   const handleCover = (value) => {
-    setUnsavedDataHandler(value);
     setFormData((prevState) => ({
       ...prevState,
       cover: value,
@@ -248,7 +244,6 @@ const InitialDataForm = ({
   };
 
   const handleIpp = (value) => {
-    setUnsavedDataHandler(value);
     setFormData((prevState) => ({
       ...prevState,
       ipp: value,
@@ -256,7 +251,6 @@ const InitialDataForm = ({
   };
 
   const handleInstructor = (newValue) => {
-    setUnsavedDataHandler(newValue.val);
     setFormData((prevState) => ({
       ...prevState,
       instructor: newValue.val,
@@ -266,7 +260,6 @@ const InitialDataForm = ({
   };
 
   const handleProsecution = (newValue) => {
-    setUnsavedDataHandler(newValue.val);
     setFormData((prevState) => ({
       ...prevState,
       prosecution: newValue.val,
@@ -276,7 +269,6 @@ const InitialDataForm = ({
   };
 
   const handleCourt = (newValue) => {
-    setUnsavedDataHandler(newValue.val);
     setFormData((prevState) => ({
       ...prevState,
       court: newValue.val,
@@ -286,7 +278,6 @@ const InitialDataForm = ({
   };
 
   const handleJudicialBody = (value) => {
-    setUnsavedDataHandler(value);
     setFormData((prevState) => ({
       ...prevState,
       judicialBody: value,
@@ -294,7 +285,6 @@ const InitialDataForm = ({
   };
 
   const handleIsn = (value) => {
-    setUnsavedDataHandler(value);
     setFormData((prevState) => ({
       ...prevState,
       isn: value,
@@ -302,52 +292,106 @@ const InitialDataForm = ({
   };
 
   const handleRequestDate = (value) => {
-    setUnsavedDataHandler(value);
     setFormData((prevState) => ({
       ...prevState,
       requestDate: value,
     }));
   };
 
-  const valueIsNotDefault = {
-    cover: formData.cover !== "" && true,
-    instructor: formData.instructor !== "" && true,
-    prosecution: formData.prosecution !== "" && true,
-    court: formData.court !== "" && true,
-    judicialBody: formData.judicialBody !== "" && true,
-    isn: formData.isn !== "" && true,
-    requestDate: formData.requestDate !== "" && true,
-  };
+  //To manage unsaved field data
+  const getSpredKeys = useCallback((obj, isSummary) => {
+    if (isSummary) {
+      const {
+        cover,
+        ipp,
+        instructor,
+        instructor_rank,
+        instructor_id,
+        prosecution,
+        prosecutor,
+        prosecution_id,
+        court,
+        judge,
+        court_id,
+      } = obj;
 
+      return {
+        cover,
+        ipp,
+        instructor,
+        instructor_rank,
+        instructor_id,
+        prosecution,
+        prosecutor,
+        prosecution_id,
+        court,
+        judge,
+        court_id,
+      };
+    } else {
+      const {
+        cover,
+        ipp,
+        instructor,
+        instructor_rank,
+        instructor_id,
+        judicialBody,
+        isn,
+        requestDate,
+      } = obj;
+
+      return {
+        cover,
+        ipp,
+        instructor,
+        instructor_rank,
+        instructor_id,
+        judicialBody,
+        isn,
+        requestDate,
+      };
+    }
+  }, []);
+
+  const fieldsData = useMemo(
+    () => getSpredKeys(formData, isSummary),
+    [formData, isSummary, getSpredKeys]
+  );
+
+  useUnsavedFormData({
+    setUnsavedDataHandler,
+    fieldsData,
+    comparisonData: isEdition ? summarySelected : DEFAULT_FORM_DATA,
+  });
   useEffect(() => {
-    const getFormDataValuesFrom = (selectedSummary) => {
+    const getFormDataValuesFrom = (summarySelected) => {
       const commonValues = {
-        id: selectedSummary.id,
-        version_id: selectedSummary.version_id,
-        type: selectedSummary.type,
-        cover: selectedSummary.cover,
-        ipp: selectedSummary.ipp,
-        instructor: selectedSummary.instructor,
-        instructor_rank: selectedSummary.instructor_rank,
-        instructor_id: selectedSummary.instructor_id,
+        id: summarySelected.id,
+        version_id: summarySelected.version_id,
+        type: summarySelected.type,
+        cover: summarySelected.cover,
+        ipp: summarySelected.ipp,
+        instructor: summarySelected.instructor,
+        instructor_rank: summarySelected.instructor_rank,
+        instructor_id: summarySelected.instructor_id,
       };
 
       const summaryValues = {
-        prosecution: selectedSummary.prosecution,
-        prosecutor: selectedSummary.prosecutor,
-        prosecution_id: selectedSummary.prosecution_id,
-        court: selectedSummary.court,
-        judge: selectedSummary.judge,
-        court_id: selectedSummary.court_id,
+        prosecution: summarySelected.prosecution,
+        prosecutor: summarySelected.prosecutor,
+        prosecution_id: summarySelected.prosecution_id,
+        court: summarySelected.court,
+        judge: summarySelected.judge,
+        court_id: summarySelected.court_id,
       };
 
       const nonSummaryValues = {
-        judicialBody: selectedSummary.judicialBody,
-        isn: selectedSummary.isn,
-        requestDate: selectedSummary.requestDate,
+        judicialBody: summarySelected.judicialBody,
+        isn: summarySelected.isn,
+        requestDate: summarySelected.requestDate,
       };
 
-      if (selectedSummary.type === "isSummary") {
+      if (summarySelected.type === "isSummary") {
         return { ...commonValues, ...summaryValues };
       } else {
         return { ...commonValues, ...nonSummaryValues };
@@ -360,6 +404,7 @@ const InitialDataForm = ({
         setFormData(getFormDataValuesFrom(summarySelected));
         if (formData.id !== "") {
           setFormMessage(DEFAULT_FORM_MESSAGE);
+          setRequiredError(DEFAULT_REQUIRED_ERROR);
         }
       } else if (summarySelected.version_id !== formData.version_id) {
         setFormData(getFormDataValuesFrom(summarySelected));
@@ -378,33 +423,33 @@ const InitialDataForm = ({
     renewSummarySelected,
   ]);
   return (
-    <FormContainer className="column max900">
+    <FormContainer className='column max900'>
       <FieldsContainer>
         <ResponsiveItem>
           <Select
-            label="Tipo de actuación"
+            label='Tipo de actuación'
             value={formData.type}
             onChange={handleType}
             options={SUMMARY_TYPES}
             inputProps={{ disabled: isEdition }}
           />
           <Input
-            label="Carátula"
+            label='Carátula'
             value={formData.cover}
             onChange={handleCover}
             required
             error={getInputErrorException(
               requiredError.error,
-              valueIsNotDefault.cover
+              getValueIsNotDefinedCondition(formData.cover)
             )}
             helperText={getInputErrorException(
               requiredError.helperText,
-              valueIsNotDefault.cover
+              getValueIsNotDefinedCondition(formData.cover)
             )}
           />
-          <Input label="IPP" value={formData.ipp} onChange={handleIpp} />
+          <Input label='IPP' value={formData.ipp} onChange={handleIpp} />
           <Combobox
-            label="Instructor"
+            label='Instructor'
             options={ps_data.instructors}
             onChange={handleInstructor}
             value={{
@@ -415,18 +460,18 @@ const InitialDataForm = ({
             required
             error={getInputErrorException(
               requiredError.error,
-              valueIsNotDefault.instructor
+              getValueIsNotDefinedCondition(formData.instructor)
             )}
             helperText={getInputErrorException(
               requiredError.helperText,
-              valueIsNotDefault.instructor
+              getValueIsNotDefinedCondition(formData.instructor)
             )}
           />
         </ResponsiveItem>
         <ResponsiveItem>
-          <RenderIf condition={formData.type === "isSummary"}>
+          <RenderIf condition={isSummary}>
             <Combobox
-              label="Fiscalía"
+              label='Fiscalía'
               options={ps_data.prosecutions}
               onChange={handleProsecution}
               value={{
@@ -437,15 +482,15 @@ const InitialDataForm = ({
               required
               error={getInputErrorException(
                 requiredError.error,
-                valueIsNotDefault.prosecution
+                getValueIsNotDefinedCondition(formData.prosecution)
               )}
               helperText={getInputErrorException(
                 requiredError.helperText,
-                valueIsNotDefault.prosecution
+                getValueIsNotDefinedCondition(formData.prosecution)
               )}
             />
             <Combobox
-              label="Juzg. Gtias."
+              label='Juzg. Gtias.'
               options={ps_data.courts}
               onChange={handleCourt}
               value={{
@@ -456,57 +501,57 @@ const InitialDataForm = ({
               required
               error={getInputErrorException(
                 requiredError.error,
-                valueIsNotDefault.court
+                getValueIsNotDefinedCondition(formData.court)
               )}
               helperText={getInputErrorException(
                 requiredError.helperText,
-                valueIsNotDefault.court
+                getValueIsNotDefinedCondition(formData.court)
               )}
             />
           </RenderIf>
-          <RenderIf condition={formData.type !== "isSummary"}>
+          <RenderIf condition={!isSummary}>
             <Input
-              label="Órgano judicial interviniente"
+              label='Órgano judicial interviniente'
               value={formData.judicialBody}
               onChange={handleJudicialBody}
               required
               error={getInputErrorException(
                 requiredError.error,
-                valueIsNotDefault.judicialBody
+                getValueIsNotDefinedCondition(formData.judicialBody)
               )}
               helperText={getInputErrorException(
                 requiredError.helperText,
-                valueIsNotDefault.judicialBody
+                getValueIsNotDefinedCondition(formData.judicialBody)
               )}
             />
             <Input
-              label="ISN"
+              label='ISN'
               value={formData.isn}
               onChange={handleIsn}
               required
               error={getInputErrorException(
                 requiredError.error,
-                valueIsNotDefault.isn
+                getValueIsNotDefinedCondition(formData.isn)
               )}
               helperText={getInputErrorException(
                 requiredError.helperText,
-                valueIsNotDefault.isn
+                getValueIsNotDefinedCondition(formData.isn)
               )}
             />
             <Input
-              label="Fecha de alta"
+              label='Fecha de alta'
               value={formData.requestDate}
               onChange={handleRequestDate}
               required
               error={getInputErrorException(
                 requiredError.error,
-                valueIsNotDefault.requestDate
+                getValueIsNotDefinedCondition(formData.requestDate)
               )}
               helperText={
                 requiredError.helperText
                   ? getInputErrorException(
                       requiredError.helperText,
-                      valueIsNotDefault.requestDate
+                      getValueIsNotDefinedCondition(formData.requestDate)
                     )
                   : "Use formato dd/mm/yyyy"
               }
@@ -524,6 +569,7 @@ const InitialDataForm = ({
       <FormSettings
         unsavedData={unsavedInitialData}
         isEdition={isEdition}
+        isSession={isSession}
         onSubmit={submitForm}
         onRenew={renewSummarySelected}
       />

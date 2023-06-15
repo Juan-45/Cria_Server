@@ -10,8 +10,8 @@ const Container = styled(Paper)(({ theme }) => ({
   width: "100%",
 }));
 
-const InvolvedsSelector = ({
-  involveds,
+const VehiclesSelector = ({
+  vehicles,
   selectedItemId,
   selectItem,
   deleteItem,
@@ -19,37 +19,19 @@ const InvolvedsSelector = ({
   return (
     <Container square>
       <ResponsiveContainer>
-        <ResponsiveItem className='max-4-columns'>
+        <ResponsiveItem className='paddingInBetween'>
           <InteractiveList
-            title='Víctimas'
-            list={involveds.victims}
+            title='Secuestrados'
+            list={vehicles.seized}
             selectedItemId={selectedItemId}
             selectItem={selectItem}
             deleteItem={deleteItem}
           />
         </ResponsiveItem>
-        <ResponsiveItem className='max-4-columns'>
+        <ResponsiveItem className='paddingInBetween'>
           <InteractiveList
-            title='Denunciantes'
-            list={involveds.complainants}
-            selectedItemId={selectedItemId}
-            selectItem={selectItem}
-            deleteItem={deleteItem}
-          />
-        </ResponsiveItem>
-        <ResponsiveItem className='max-4-columns'>
-          <InteractiveList
-            title='Causantes'
-            list={involveds.causants}
-            selectedItemId={selectedItemId}
-            selectItem={selectItem}
-            deleteItem={deleteItem}
-          />
-        </ResponsiveItem>
-        <ResponsiveItem className='max-4-columns'>
-          <InteractiveList
-            title='Imputados'
-            list={involveds.accuseds}
+            title='Sustraidos'
+            list={vehicles.stolen}
             selectedItemId={selectedItemId}
             selectItem={selectItem}
             deleteItem={deleteItem}
@@ -60,4 +42,4 @@ const InvolvedsSelector = ({
   );
 };
 
-export default memo(InvolvedsSelector);
+export default memo(VehiclesSelector);

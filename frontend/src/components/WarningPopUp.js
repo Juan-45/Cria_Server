@@ -17,26 +17,29 @@ const WarningPopUp = ({
   message,
   onAccept,
   onCancel,
+  withOptions = true,
 }) => {
   const handleClose = () => setOpen(false);
 
   return (
     <RenderIf condition={open}>
       <FixedContainer>
-        <PopUp className="warning">
+        <PopUp className='warning'>
           <CloseButton onClick={handleClose} disableRipple={true}>
-            <CloseIcon size="small" />
+            <CloseIcon size='small' />
           </CloseButton>
-          <PopUpHeader variant="h2" className="warning">
+          <PopUpHeader variant='h2' className='warning'>
             {title}
           </PopUpHeader>
-          <Text className="center">{message}</Text>
-          <ButtonContainer>
-            <Button onClick={onAccept}>Si</Button>
-            <Button onClick={onCancel} className="leftSpace">
-              No
-            </Button>
-          </ButtonContainer>
+          <Text className='center'>{message}</Text>
+          <RenderIf condition={withOptions}>
+            <ButtonContainer>
+              <Button onClick={onAccept}>Si</Button>
+              <Button onClick={onCancel} className='leftSpace'>
+                No
+              </Button>
+            </ButtonContainer>
+          </RenderIf>
         </PopUp>
       </FixedContainer>
     </RenderIf>

@@ -1,6 +1,6 @@
 import useSummaries from "hooks/useSummaries";
 import useGet_ps_data from "hooks/useGet_ps_data";
-import { Typography } from "@mui/material";
+import { Typography, Alert } from "@mui/material";
 import { GenericContainer, Divider } from "components/CommonStyles";
 import TableBasic from "components/Table";
 import SessionSelectorTab from "components/SessionSelectorTab";
@@ -10,17 +10,9 @@ import ErrorPopUp from "components/ErrorPopUp";
 import InitialDataForm from "pages/summaries/InitialDataForm";
 import RenderIf from "components/RenderIf";
 import Loading from "components/Loading";
-import Involveds from "./summaries/Involveds";
-/*import {
-  saveItem,
-  removeItem,
-  // getCurrentSessionTimestamp_key,
-  getCurrentSession_key,
-  // getCurrentUserSessionID_key,
-  //getPreviousSession_Key,
-  getLocalStorageSize,
-  // load_globalData,
-} from "helpers/localStorage";*/
+import Involveds from "pages/summaries/Involveds";
+import Vehicles from "pages/summaries/Vehicles";
+import TemplateManager from "pages/summaries/TemplateManager";
 
 const HEAD = [
   { label: "Actuaciones por:", key: "summary_by" },
@@ -35,12 +27,9 @@ const Summaries = ({
   currentUser,
   sessionSummaries,
   session_previousSummaries,
-  setGlobalData,
-  filesPicker,
-  manage_service_filesSubFolder,
-  manage_backup_subFolder,
   updatePreviousSessionSummaries,
   updateSessionSummaries,
+  getSummaryFiles,
 }) => {
   const {
     session_summaries,
@@ -58,8 +47,6 @@ const Summaries = ({
     setUnsavedWarningData_selectSummary,
     setEdition_warningData,
     setInfoData,
-    setSession_summaries,
-    setSession_previous_summaries,
     setUnsavedFormDataConditions,
     setSummarySelected,
     selectSummary,
@@ -72,7 +59,6 @@ const Summaries = ({
   } = useSummaries({
     sessionSummaries,
     session_previousSummaries,
-    setGlobalData,
     updatePreviousSessionSummaries,
     updateSessionSummaries,
   });
@@ -80,7 +66,7 @@ const Summaries = ({
 
   const isSummarySelected = summarySelected !== null;
 
-  console.log("ESTADOS Summaries:", {
+  /*console.log("ESTADOS Summaries:", {
     session_summaries,
     session_previous_summaries,
     isSession,
@@ -93,29 +79,15 @@ const Summaries = ({
     ps_data,
     request_ps_data_error,
     edition_warningData,
-  });
+  });*/
 
-  //TODO: MANEJAR HANDLE PARA CREAR CARPETA INVOLUCRADO (fullName), dentro de carpeta hecho (filesSubFolder_name)
-  //TODO: MANEJAR HANDLE PARA CREAR CARPETA VEHÍCULO (vehicle+brand+model), dentro de carpeta hecho, y
-  // dentro de carpeta involucrado (fullName) si "involucrado asociado" es true
-
-  /*
-
-  const selectServiceFolder = async () => {
-    const files_subFolderHandle = await manage_service_filesSubFolder({
-      filesSubFolder_name: "Hecho de prueba 2",
-    });
-    return files_subFolderHandle;
-  };
-
-  const selectBackupFolder = async () => {
-    const backupHandle = await manage_backup_subFolder();
-    return backupHandle;
-  };*/
+  //TODO: AGREGAR CAMPO TYPE DATE "FECHA DE ACTUACIONES" A INITIALDATAFORM
+  //TODO: AL CAPTURAR DATOS PARA ARMADO DE ARCHIVO, USAR DAY, MONTH, YEAR, DE LA SECCIÓN INITIAL DATA, PARA ARMAR LA FECHA
+  //PARA: ARCHIVOS DE BASE Y LEGAJOS
 
   return (
     <GenericContainer
-      className="column max1200 sidePaddingOnLg"
+      className='column max1200 sidePaddingOnLg'
       sx={{ paddingBottom: "300px" }}
     >
       <ErrorPopUp
@@ -201,7 +173,7 @@ const Summaries = ({
           selectSessionType={selectSessionType}
         />
       </RenderIf>
-      <Typography variant="h1" gutterBottom>
+      <Typography variant='h1' gutterBottom>
         Listado de actuaciones
       </Typography>
       <TableBasic
@@ -218,15 +190,21 @@ const Summaries = ({
         selectedSummaryId={summarySelected ? summarySelected.id : null}
         selectSummary={selectSummary}
         openDeleteWarning={openDeleteWarning}
+        noDeleteSummary={!isSession}
       />
-      <Divider />
-      <Typography variant="h2" gutterBottom>
+      <Typography variant='h2' gutterBottom>
         Datos iniciales
       </Typography>
       <RenderIf condition={!ps_data.ps_data_ready}>
         <Loading />
       </RenderIf>
-      <RenderIf condition={ps_data.ps_data_ready}>
+      <RenderIf
+        condition={
+          isSession
+            ? ps_data.ps_data_ready
+            : ps_data.ps_data_ready && summarySelected
+        }
+      >
         <InitialDataForm
           ps_data={ps_data}
           setUnsavedFormDataConditions={setUnsavedFormDataConditions}
@@ -234,7 +212,16 @@ const Summaries = ({
           unsavedInitialData={unsavedFormDataConditions.initialData}
           setSummarySelected={setSummarySelected}
           manageSummarySubmission={manageSummarySubmission}
+          isSession={isSession}
         />
+      </RenderIf>
+      <RenderIf condition={!summarySelected && !isSession}>
+        <Alert severity='info'>
+          Al trabajar con datos de una sesión anterior, solo es posible
+          modificar esos datos, no podra agregar datos para una nueva actuación,
+          ni eliminar atuaciones existentes. Para continuar, seleccione una
+          actuación de la lista.
+        </Alert>
       </RenderIf>
       <RenderIf condition={isSummarySelected}>
         <Divider />
@@ -244,59 +231,24 @@ const Summaries = ({
           unsavedInvolvedData={unsavedFormDataConditions.involveds}
           manageSummarySubmission={manageSummarySubmission}
           setSummarySelected={setSummarySelected}
-          /*  involveds={[
-            {
-              id: "1",
-              type: "isVictim",
-              gender: "masculino",
-              fullName: "Juan Perez",
-              nationality: "Argentina",
-              education: "sí",
-              civilStatus: "soltero",
-              occupation: "empleado",
-              age: "30",
-              birthDate: "1992-05-10",
-              dni: "12345678",
-              phone: "123456789",
-              address: "Calle Principal 123",
-              city: "Pergamino",
-              province: "Buenos Aires",
-            },
-            {
-              id: "2",
-              type: "isComplainant",
-              gender: "femenino",
-              fullName: "Maria Gonzalez",
-              nationality: "Argentina",
-              education: "no",
-              civilStatus: "casada",
-              occupation: "ama de casa",
-              age: "35",
-              birthDate: "1987-09-20",
-              dni: "98765432",
-              phone: "987654321",
-              address: "Avenida Principal 456",
-              city: "Pergamino",
-              province: "Buenos Aires",
-            },
-            {
-              id: "3",
-              type: "isAccused",
-              gender: "masculino",
-              fullName: "Carlos Sanchez",
-              nationality: "Argentina",
-              education: "sí",
-              civilStatus: "divorciado",
-              occupation: "jubilado/pensionado",
-              age: "60",
-              birthDate: "1963-03-15",
-              dni: "54321678",
-              phone: "543216789",
-              address: "Plaza Principal 789",
-              city: "Pergamino",
-              province: "Buenos Aires",
-            },
-          ]}*/
+        />
+        <Divider />
+        <Vehicles
+          involveds={summarySelected ? summarySelected.involveds : null}
+          vehicles={summarySelected ? summarySelected.vehicles : null}
+          setUnsavedFormDataConditions={setUnsavedFormDataConditions}
+          unsavedVehicleData={unsavedFormDataConditions.vehicles}
+          manageSummarySubmission={manageSummarySubmission}
+          setSummarySelected={setSummarySelected}
+        />
+        <Divider />
+        <Typography variant='h1' gutterBottom>
+          Obtención de plantillas
+        </Typography>
+        <TemplateManager
+          summarySelected={summarySelected}
+          currentUser={currentUser}
+          getSummaryFiles={getSummaryFiles}
         />
       </RenderIf>
     </GenericContainer>
