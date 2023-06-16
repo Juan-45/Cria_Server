@@ -3,7 +3,7 @@
 const path = require("path");
 
 module.exports = {
-  mode: "development", //"development",//
+  mode: "production", //"development",//
   context: __dirname,
   entry: {
     appOS: {
