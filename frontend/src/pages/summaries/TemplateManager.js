@@ -214,6 +214,7 @@ const TemplateManager = ({ summarySelected, currentUser, getSummaryFiles }) => {
     const getValuesFrom = (involvedSelected, summarySelected) => {
       const commonValues = {
         ...getDateProperties(),
+        type: involvedSelected.type,
         gender: involvedSelected.gender,
         fullName: involvedSelected.fullName,
         nationality: involvedSelected.nationality,
