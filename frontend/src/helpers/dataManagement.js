@@ -125,6 +125,13 @@ const isTimesstampOld = (timestamp, cycle_durationn) => {
   return timeDifferenceInHours > cycle_durationn ? true : false;
 };
 
+const getInvolvedTypeLabel = (type) => {
+  if (type === "isVictim") return "Vícitma";
+  if (type === "isComplainant") return "Denunciante";
+  if (type === "isCausant") return "Causante";
+  if (type === "isAccused") return "Imputado";
+};
+
 export {
   sortData,
   manageDefaultStringForTable,
@@ -139,4 +146,5 @@ export {
   getVehicleDataStr,
   getVehiclesStrByStatus,
   isTimesstampOld,
+  getInvolvedTypeLabel,
 };

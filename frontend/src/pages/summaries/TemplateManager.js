@@ -13,6 +13,7 @@ import {
   getInvolvedsStrByType,
   getVehicleDataStr,
   getVehiclesStrByStatus,
+  getInvolvedTypeLabel,
 } from "helpers/dataManagement";
 
 const Subtitle = styled(Typography)(({ theme }) => ({
@@ -214,7 +215,7 @@ const TemplateManager = ({ summarySelected, currentUser, getSummaryFiles }) => {
     const getValuesFrom = (involvedSelected, summarySelected) => {
       const commonValues = {
         ...getDateProperties(),
-        type: involvedSelected.type,
+        type: getInvolvedTypeLabel(involvedSelected.type),
         gender: involvedSelected.gender,
         fullName: involvedSelected.fullName,
         nationality: involvedSelected.nationality,
