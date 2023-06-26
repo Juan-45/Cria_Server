@@ -14,6 +14,7 @@ import {
   getVehicleDataStr,
   getVehiclesStrByStatus,
   getInvolvedTypeLabel,
+  composeFolderName,
 } from "helpers/dataManagement";
 
 const Subtitle = styled(Typography)(({ theme }) => ({
@@ -205,7 +206,10 @@ const TemplateManager = ({ summarySelected, currentUser, getSummaryFiles }) => {
 
     await getSummaryFiles({
       setWarningData: setWrongFile_warningData,
-      summaryFolderName: summarySelected.summary_by,
+      summaryFolderName: composeFolderName(
+        summarySelected.summary_by,
+        summarySelected.id
+      ),
       data: getValuesFrom(summarySelected),
       folder_reference: "base_files",
     });
@@ -310,8 +314,14 @@ const TemplateManager = ({ summarySelected, currentUser, getSummaryFiles }) => {
 
     await getSummaryFiles({
       setWarningData: setWrongFile_warningData,
-      summaryFolderName: summarySelected.summary_by,
-      optional_inner_subFolder: involvedSelected.fullName,
+      summaryFolderName: composeFolderName(
+        summarySelected.summary_by,
+        summarySelected.id
+      ),
+      optional_inner_subFolder: composeFolderName(
+        involvedSelected.fullName,
+        involvedSelected.id
+      ),
       data: getValuesFrom(involvedSelected, summarySelected),
       folder_reference: "involveds_files",
     });
@@ -386,8 +396,14 @@ const TemplateManager = ({ summarySelected, currentUser, getSummaryFiles }) => {
 
     await getSummaryFiles({
       setWarningData: setWrongFile_warningData,
-      summaryFolderName: summarySelected.summary_by,
-      optional_inner_subFolder: getVehicleLabel(vehicleSelected),
+      summaryFolderName: composeFolderName(
+        summarySelected.summary_by,
+        summarySelected.id
+      ),
+      optional_inner_subFolder: composeFolderName(
+        getVehicleLabel(vehicleSelected),
+        vehicleSelected.id
+      ),
       data: getValuesFrom(vehicleSelected, summarySelected, associatedSelected),
       folder_reference: "vehicles_files",
     });

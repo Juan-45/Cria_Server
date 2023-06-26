@@ -45,7 +45,7 @@ const getInvolvedsNames_by = (type, involveds) => {
 };
 
 const getVehicleLabel = (vehicle) =>
-  `${vehicle.type} ${vehicle.brand} ${vehicle.model} ${vehicle.color}`;
+  `${vehicle.brand} ${vehicle.model} ${vehicle.color}`;
 
 const getInvolvedDataStr = (involved) => {
   const educationLabel =
@@ -132,6 +132,12 @@ const getInvolvedTypeLabel = (type) => {
   if (type === "isAccused") return "Imputado";
 };
 
+const composeFolderName = (name, id) => {
+  const truncatedID = id.slice(0, 6);
+  const folderName = `${name}_ID_${truncatedID}`;
+  return folderName;
+};
+
 export {
   sortData,
   manageDefaultStringForTable,
@@ -147,4 +153,5 @@ export {
   getVehiclesStrByStatus,
   isTimesstampOld,
   getInvolvedTypeLabel,
+  composeFolderName,
 };
