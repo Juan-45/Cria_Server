@@ -170,9 +170,8 @@ const TemplateManager = ({ summarySelected, currentUser, getSummaryFiles }) => {
           summarySelected.involveds,
           "isCausant"
         ),
-        accusedsDataStr: getInvolvedsStrByType(
-          summarySelected.involveds,
-          "isAccused"
+        accusedsDataStr: manageDefaultStringForAccussed(
+          getInvolvedsStrByType(summarySelected.involveds, "isAccused")
         ),
         vehiclesStolenDataStr: getVehiclesStrByStatus(
           summarySelected.vehicles,
@@ -438,12 +437,12 @@ const TemplateManager = ({ summarySelected, currentUser, getSummaryFiles }) => {
         title={wrongFile_warningData.title}
         message={wrongFile_warningData.message}
       />
-      <FormContainer className='max900 column'>
-        <Typography variant='h2' gutterBottom>
+      <FormContainer className="max900 column">
+        <Typography variant="h2" gutterBottom>
           Plantillas de base
         </Typography>
         <FlexContainer>
-          <Subtitle variant='subtitle1' gutterBottom>
+          <Subtitle variant="subtitle1" gutterBottom>
             Utilizar este selector para cargar datos en plantillas de base:
           </Subtitle>
           <Ul>
@@ -459,19 +458,19 @@ const TemplateManager = ({ summarySelected, currentUser, getSummaryFiles }) => {
         </FlexContainer>
         <Button onClick={generateBaseTemplates}>Abrir selector</Button>
       </FormContainer>
-      <FormContainer className='max900 column'>
-        <Typography variant='h2' gutterBottom>
+      <FormContainer className="max900 column">
+        <Typography variant="h2" gutterBottom>
           Plantillas de involucrados
         </Typography>
-        <FlexContainer className='extraMarginBottom'>
-          <Subtitle variant='subtitle1' gutterBottom>
+        <FlexContainer className="extraMarginBottom">
+          <Subtitle variant="subtitle1" gutterBottom>
             {involveds
               ? "Para cargar los datos que corresponden, primero seleccione un involucrado:"
               : "No hay involucrados para seleccionar"}
           </Subtitle>
           <ResponsiveItem>
             <Select
-              label='Involucrados'
+              label="Involucrados"
               value={involvedId}
               onChange={handleInvolvedSelection}
               options={involvedsOptions}
@@ -486,19 +485,19 @@ const TemplateManager = ({ summarySelected, currentUser, getSummaryFiles }) => {
           Abrir selector
         </Button>
       </FormContainer>
-      <FormContainer className='max900 column'>
-        <Typography variant='h2' gutterBottom>
+      <FormContainer className="max900 column">
+        <Typography variant="h2" gutterBottom>
           Plantillas de vehículos
         </Typography>
         <FlexContainer>
-          <Subtitle variant='subtitle1' gutterBottom>
+          <Subtitle variant="subtitle1" gutterBottom>
             {vehicles
               ? "Seleccione un vehículo y si correspone el involucrado asociado:"
               : "No hay vehículos para seleccionar"}
           </Subtitle>
           <ResponsiveItem>
             <Select
-              label='Vehículos'
+              label="Vehículos"
               value={vehicleId}
               onChange={handleVehicleSelection}
               options={vehiclesOptions}
@@ -507,7 +506,7 @@ const TemplateManager = ({ summarySelected, currentUser, getSummaryFiles }) => {
           </ResponsiveItem>
           <ResponsiveItem>
             <Select
-              label='Asociado a'
+              label="Asociado a"
               value={associateId}
               onChange={handleAssociatedSelection}
               options={associatesOptions}
